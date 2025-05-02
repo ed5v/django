@@ -1,0 +1,105 @@
+# Requiere: pyodbc instalado y DSN configurado para conectar a Access
+import tkinter as tk
+from tkinter import messagebox
+import pyodbc
+from datetime import datetime
+
+# Configuración de conexión con Access
+DB_PATH = r'C:\ruta\a\Restaurante_Mariscos.accdb'  # Cambiar por tu ruta
+conn_str = (
+    r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};'
+    fr'DBQ={DB_PATH};'
+)
+
+class App:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Punto de Venta - Mariscos")
+        self.root.geometry("400x300")
+        self.user_id = None
+        self.build_login()
+
+    def build_login(self):
+        for widget in self.root.winfo_children(): widget.destroy()
+        tk.Label(self.root, text="Inicio de sesión", font=("Arial", 16)).pack(pady=10)
+        tk.Label(self.root, text="Número de Empleado:").pack()
+        self.entry_user = tk.Entry(self.root)
+        self.entry_user.pack()
+        tk.Label(self.root, text="Contraseña:").pack()
+        self.entry_pass = tk.Entry(self.root, show="*")
+        self.entry_pass.pack()
+        tk.Button(self.root, text="Ingresar", command=self.login).pack(pady=10)
+
+    def login(self):
+        usuario = self.entry_user.get()
+        contrasena = self.entry_pass.get()
+        now = datetime.now()
+
+        try:
+            conn = pyodbc.connect(conn_str)
+            cursor = conn.cursor()
+
+            cursor.execute("SELECT * FROM tbl_USUARIOS WHERE NUM_EMPLEADO=? AND CONTRASENA=?", (usuario, contrasena))
+            user = cursor.fetchone()
+            if user:
+                self.user_id = int(usuario)
+                cursor.execute("INSERT INTO tbl_ACCESO (FECHA_HORA, NUM_EMPLEADO, OBSERVACIONES) VALUES (?, ?, ?)",
+                               now, usuario, 'Acceso correcto')
+                conn.commit()
+                self.show_main_menu()
+            else:
+                cursor.execute("INSERT INTO tbl_ACCESO (FECHA_HORA, NUM_EMPLEADO, OBSERVACIONES) VALUES (?, ?, ?)",
+                               now, usuario, 'Contraseña incorrecta')
+                conn.commit()
+                messagebox.showerror("Error", "Usuario o contraseña incorrectos")
+            conn.close()
+        except Exception as e:
+            messagebox.showerror("Error de conexión", str(e))
+
+    def show_main_menu(self):
+        for widget in self.root.winfo_children(): widget.destroy()
+        tk.Label(self.root, text="Menú Principal", font=("Arial", 16)).pack(pady=10)
+        tk.Button(self.root, text="Servicio en Mesa", width=20).pack(pady=5)
+        tk.Button(self.root, text="Para Llevar", width=20).pack(pady=5)
+
+        if self.user_id == 1:
+            tk.Button(self.root, text="Inventario", width=20, command=self.inventario).pack(pady=5)
+            tk.Button(self.root, text="Ventas", width=20).pack(pady=5)
+            tk.Button(self.root, text="Pedidos", width=20).pack(pady=5)
+
+    def inventario(self):
+        for widget in self.root.winfo_children(): widget.destroy()
+        tk.Label(self.root, text="Inventario", font=("Arial", 16)).pack(pady=10)
+        productos = ["Coctel", "Filete", "Naranjada"]
+        for prod in productos:
+            tk.Button(self.root, text=prod, command=lambda p=prod: self.editar_producto(p)).pack(pady=5)
+        tk.Button(self.root, text="Volver", command=self.show_main_menu).pack(pady=10)
+
+    def editar_producto(self, producto):
+        edit_win = tk.Toplevel(self.root)
+        edit_win.title(f"Editar - {producto}")
+        tk.Label(edit_win, text=f"Producto: {producto}").pack(pady=5)
+        tk.Label(edit_win, text="Observaciones:").pack()
+        obs = tk.Text(edit_win, height=4, width=30)
+        obs.pack()
+        tk.Label(edit_win, text="Precio:").pack()
+        precio_entry = tk.Entry(edit_win)
+        precio_entry.pack()
+        tk.Button(edit_win, text="Agregar", command=lambda: self.guardar_venta(producto, obs.get("1.0", tk.END), precio_entry.get(), edit_win)).pack(pady=5)
+
+    def guardar_venta(self, producto, observaciones, precio, win):
+        try:
+            conn = pyodbc.connect(conn_str)
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO tbl_VENTAS (FECHA, PRODUCTO, MESERO, PRECIO, CANTIDAD, TOTAL, CLIENTE, OBSERVACIONES) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                           datetime.now(), producto, self.user_id, float(precio), 1, float(precio), "Cliente", observaciones.strip())
+            conn.commit()
+            conn.close()
+            win.destroy()
+            messagebox.showinfo("Éxito", "Producto registrado en venta")
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+
+root = tk.Tk()
+app = App(root)
+root.mainloop()
