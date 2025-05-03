@@ -9,7 +9,42 @@
 
 
 
-body {
+body{
    
     background-color: whitesmoke;
+}
+
+header{
+    width: 1212px;
+    height: 140px;
+    margin: auto;   
+    
+}
+
+#logotipo{
+    width: 35%;
+    height: 130px;
+    background-color: #040d20;
+    margin: auto;   
+    padding top: 10px;
+    
+}
+
+#logotipo img{
+    display: block;
+    float: left;
+    width: 80px;
+    margin-top: 20px;
+    
+}
+
+#logotipo h1{
+    display: block;
+    float: left;
+    margin-top: 40px;
+    margin-left: 20px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: normal;
+    color: #42a096;
 }
