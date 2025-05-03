@@ -16,37 +16,34 @@
 </head>
 
 <body>
+    <header>
+        <div id="logotipo">
+            <h1> BIENVENIDO </h1>
+        </div>
+ 
+    </header>
+    
+    <nav>
 
-    <h1> BIENVENIDO </h1>
-    <hr />
-    <ul>
-        <li>
-            <a href="/AUDITORIA">AUDITORIA</a>
-        </li>
-        <li>
-            <a href="/CAJA">CAJA</a>
-        </li>
-        <li>
-            <a href="/CUENTA">CUENTA</a>
-        </li>
-        <li>
-            <a href="/INICIO">INICIO</a>
-        </li>
-        <li>
-            <a href="/INVENTARIO">INVENTARIO</a>
-        </li>
-        <li>
-            <a href="/ORDEN">ORDEN</a>
-        </li>
 
-    </ul>
-    <hr />
+        <ul>
+            <li><a href="/AUDITORIA">AUDITORIA</a></li>
+            <li><a href="/CAJA">CAJA</a></li>
+            <li><a href="/CUENTA">CUENTA</a></li>
+            <li><a href="/INICIO">INICIO</a></li>
+            <li><a href="/INVENTARIO">INVENTARIO</a></li>
+            <li><a href="/ORDEN">ORDEN</a></li>
+        </ul>
+    </nav>>
+
+
 
     <div id="content">
+        <h2 class="title"> </h2>
         {% block content %}
         
         {% endblock %}
-    <hr/>
+
     <footer> 
         LA SIRENITA &copy;
     </footer>
