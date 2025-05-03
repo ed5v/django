@@ -22,8 +22,8 @@ header{
 }
 
 #logotipo{
-    width: 35%;
-    height: 130px;
+    width: 100%;
+    height: 140px;
     background-color: #040d20;
     margin: auto;   
     padding top: 10px;
@@ -42,9 +42,50 @@ header{
     display: block;
     float: left;
     margin-top: 40px;
-    margin-left: 20px;
+    margin-left: 300px;
     letter-spacing: 2px;
     text-transform: uppercase;
     font-weight: normal;
-    color: #42a096;
+    color: #E0B344;
+}
+
+/*menú*/
+nav{
+    width: 1250px;
+    height: 40px;
+    margin: 0 auto;
+    background-color: #1b1e1f;
+    border: 1px solid #333;
+    box-shadow: 0px 22px 22px #gray;
+    font-size: 15px;
+}
+
+nav ul{
+    list-style: none;
+    text-decoration: none;
+    
+}
+
+nav ul li{
+
+    line-height: 40px;
+    float: left;
+    
+}
+
+nav ul li a{
+    display: block;
+    padding-left: 15px ;
+    padding-right: 15px;
+    color: #d1d4d6;
+
+        
+}
+
+nav ul li a:hover{
+    background-color: #E0B344;
+    box-shadow: 0px 0px 5px #33333 inset;
+    color: #fff;
+    text-decoration: none;
+    transition: 0.5s;
 }
