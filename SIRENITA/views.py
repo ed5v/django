@@ -1,5 +1,5 @@
 import re
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.utils.timezone import datetime
 from django.http import HttpResponse
 #from django.http import HttpResponse
@@ -60,7 +60,18 @@ def INVENTARIO (request):
 def ORDEN (request):
     return render(request,'ORDEN.html')   
 
-
+def save_articulo(request):
+    articulo=Article(
+        title =title,
+        content=content,
+        public=public
+    )
+    articulo.save()
+    return HttpResponse(f"Articulo creado: <strong>{articulo.title}")
+ 
+ 
+def create_articulo(request):
+    return render(request, 'create_article.html')
 
 """def hello_there(request, name):
 #     print(request.build_absolute_uri()) #optional
@@ -72,6 +83,27 @@ def ORDEN (request):
 #            'date': datetime.now()
 #        }
 #    )"""
+
+
+
+from django.shortcuts import render
+
+def boton(request):
+    imagen='logo.png'
+    texto= 'texto del botón'
+    return render(request, 'orden.html', {'imagen': imagen, 'texto': texto})
+
+#def tabla_menu(request):
+    #return render(request, 'SIRENITA/tabla.html')
+
+def agregar_orden(request, numero):
+    if numero==1:
+        print("Acción 1 ejecutada")
+    elif numero==2:
+        print("Acción 2 ejecutada")
+    elif numero==3:
+        print("Acción 3 ejecutada")
+    return redirect('tabla')
 
 #MVC MODELO VISTA CONTROLADOR
 #MVT MODELO TEMPLATE VISTA
