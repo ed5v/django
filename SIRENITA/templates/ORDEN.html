@@ -1,10 +1,57 @@
+
 {% extends 'LAYOUT.html'%}
+
+{% load static %}
 
 {% block title %} ORDEN {% endblock %}
 
 {% block content %}
 
-<h1> MENU </h1>
+<h1> MENÚ </h1>
+
+<label for="name">CLIENTE:</label>
+<input type="text" id="name" name="user_name" />
+
+<label for="MESA">MESA:</label>
+<input type="text" id="MESA" name="NUM_MESA" />
+
+<label for="name">ORDEN:</label>
+<input type="text" id="ORDEN" name="NUM_ORDEN" />
+
 <p> Entradas </p>
+
+<!-- templates/ORDEN.html -->
+    <button class="boton">
+        <img src="{% static 'css/logo.png' %}" alt="cocktel" width="75" height="75">
+        <span>{{ Texto }} </span>
+    </button>
+
+        <button class="boton">
+        <img src="{% static 'css/logo.png' %}" alt="cocktel" width="75" height="75">
+        <span>{{ Texto }} </span>
+    </button>
+
+
+            <button class="boton">
+        <img src="{% static 'css/logo.png' %}" alt="cocktel" width="75" height="75">
+        <span>{{ Texto }} </span>
+    </button>
+
+
+            <button class="boton">
+        <img src="{% static 'css/logo.png' %}" alt="cocktel" width="75" height="75">
+        <span>{{ Texto }} </span>
+    </button>
+
+    
+            <button class="boton">
+        <img src="{% static 'css/logo.png' %}" alt="cocktel" width="75" height="75">
+        <span>{{ Texto }} </span>
+    </button>
+
+            <button class="boton">
+        <img src="{% static 'css/logo.png' %}" alt="cocktel" width="75" height="75">
+        <span>{{ Texto }} </span>
+    </button>
 
 {% endblock %}
