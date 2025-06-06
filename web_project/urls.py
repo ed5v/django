@@ -15,7 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from SIRENITA import views
 
 urlpatterns = [
@@ -27,7 +27,14 @@ urlpatterns = [
     path('CUENTA/', views.CUENTA, name= "CUENTA"),
     path('INICIO/', views.INICIO, name= "INICIO"),
     path('INVENTARIO/', views.INVENTARIO, name= "INVENTARIO"),
-    path('ORDEN/', views.ORDEN, name= "ORDEN")
+    path('ORDEN/', views.ORDEN, name= "ORDEN"),
+    
+    #path('admin/', admin.site.urls),
+    
+    path('', include('SIRENITA.urls')),
+    #path('save_article/', views.save_article, name= "save"),#
+    #path('create_article/', views.create_article, name= "create")#
+    
     #path('contacto/<str:nombre>', views.contacto, name= "contacto")#
     #path("hello/<name>", views.hello_there, name="hello_there")
     
