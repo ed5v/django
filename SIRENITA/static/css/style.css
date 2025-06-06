@@ -108,3 +108,25 @@ nav ul li a:hover{
     padding: 20px;
     border: 1px solid #ddd;
 }
+
+.boton {
+    background-color: #4CAF50;
+    border: none;
+    padding: 10px 20px;
+    font.size: 16px;
+    cursor: pointer;
+    display:flex;
+    align-items: center;
+}
+
+.boton img{
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+}
+
+.boton span {
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+}
