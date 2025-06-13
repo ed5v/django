@@ -29,7 +29,7 @@ se habilitará el menú de corte de caja en el cual se encontrará la informaci�
 * Información de los usuarios que ingresan al sistema.
 * Información de las modificaciones que se realizan desde el menú de "inventario"
 * Acceso al historial de ventas, información de interes: producto, cantidad, usuario que realiza la venta, fecha, total.
-* Ae contará con la opción de exportar la información para su posterior análisis.
+* Se contará con la opción de exportar la información para su posterior análisis.
 
 Funciones especiales: Adicionalmente considerar tener la posibilidad de mostrar notificaciones enviadas desde dispositivos conectados al mismo sistema.
 
