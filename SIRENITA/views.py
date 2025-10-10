@@ -1,7 +1,10 @@
 import re
 from django.shortcuts import render, redirect
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.utils.timezone import datetime
 from django.http import HttpResponse
+from django.contrib.auth import login, logout, authenticate
+from django.contrib
 #from django.http import HttpResponse
 
 layout= """
@@ -105,5 +108,30 @@ def agregar_orden(request, numero):
         print("Acción 3 ejecutada")
     return redirect('tabla')
 
+def logout_request(request):
+    logout(request)
+    messages.info(request, "Sesión finalizada")
+    return redirect("INICIO.html")
+
+def login_request(request):
+
+    if request.method=="POST":
+        form= AuthenticationForm(request, data=request.post)
+        if form.is__valid():
+            usuario= form.cleaned_data.get('username')
+            contrasena= form.cleaned_data.get('password')
+            user=authenticate(username=usuario, password=contrasena)
+            if user is not None:
+                login(request, user)
+                messages.info(request, f"Bienvenido {usuario}")
+                return redirect("INICIO.html")
+            else:
+                messages.error(request, "Usuario o contraseña incorrecta")
+        else:
+            messages.error(request, "Usuario o contraseña incorrecta")
+
+    form= AuthenticationForm()
+    return render(request, "login.html", {'form': form})
+    
 #MVC MODELO VISTA CONTROLADOR
 #MVT MODELO TEMPLATE VISTA
