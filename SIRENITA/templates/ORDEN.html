@@ -9,124 +9,147 @@
 
 <h1> MENÚ </h1>
 
+<div class="container">
+  <!-- Sección izquierda: Menú -->
+  <div class="menu-section">
+    <h2>Menú</h2>
+
+     <!-- Categoría Entradas -->
+    <h3>Entradas</h3>
+    <ul>
+      <li>
+        Coctel de Camarón - $120
+        <button onclick="agregarProducto(1, 'Coctel de Camarón', 120)">Agregar</button>
+      </li>
+      <li>
+        Empanadas de Camarón - $85
+        <button onclick="agregarProducto(2, 'Empanadas de Camarón', 85)">Agregar</button>
+      </li>
+      <li>
+        Tostadas de Ceviche - $70
+        <button onclick="agregarProducto(3, 'Tostadas de Ceviche', 70)">Agregar</button>
+      </li>
+    </ul>
 
 
-<button style="font-size: 16px; color: BLACK; background-color: WHITE">NUEVO TICKET</button>
-
-<p>  </p>
-
-<label for="name">CLIENTE:</label>
-<input type="text" id="name" name="user_name" />
-
-<label for="MESA">MESA:</label>
-<input type="text" id="MESA" name="NUM_MESA" />
-
-<label for="name">ORDEN:</label>
-<input type="text" id="ORDEN" name="NUM_ORDEN" />
-
-<button style="font-size: 16px; color: BLACK; background-color: WHITE">SEGUIMIENTO TICKET</button>
+    {% for categoria in categorias %}
+      <h3>{{ categoria.nombre }}</h3>
+      <ul>
+        {% for producto in categoria.producto_set.all %}
+          <li>
+            {{ producto.nombre }} - ${{ producto.precio }}
+            <button onclick="agregarProducto({{ producto.id }}, '{{ producto.nombre }}')">Agregar</button>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endfor %}
 
 
-#<p> Entradas </p>
+  </div>
 
-<!-- templates/ORDEN.html -->
-#    <button class="boton">
-#        <img src="{% static 'css/logo.png' %}" alt="cocktel" width="75" height="75">
-#        <span>{{ Texto }} </span>
-#    </button>
+  <!-- Sección derecha: Ticket del cliente -->
+  <div class="ticket-section">
+    <h2>Ticket Cliente #<span id="cliente-id">123</span></h2>
+    <div id="ticket-contenido">
+      <!-- Ticket dinámico se genera aquí -->
+    </div>
+    <hr>
+    <h3>Total: $<span id="ticket-total">0</span></h3>
+  </div>
+</div>
 
-#        <button class="boton">
-#        <img src="{% static 'css/logo.png' %}" alt="cocktel" width="75" height="75">
-#        <span>{{ Texto }} </span>
-#    </button>
+<!-- Modal para observaciones -->
+<div id="modal" style="display:none; position:fixed; top:20%; left:30%; background:#fff; padding:20px; box-shadow: 0 0 10px #000;">
+  <h3>Observaciones para <span id="modal-producto-nombre"></span></h3>
+  <textarea id="observaciones" rows="4" cols="30" placeholder="Sin cebolla, bien cocido, etc."></textarea><br><br>
+  <button onclick="enviarProducto()">Agregar al pedido</button>
+  <button onclick="cerrarModal()">Cancelar</button>
+</div>
 
+<script>
+let productoSeleccionado = null;
+let productoNombre = '';
+let productoPrecio = 0;
+let ticket = [];
 
-#            <button class="boton">
-#        <img src="{% static 'css/logo.png' %}" alt="cocktel" width="75" height="75">
-#        <span>{{ Texto }} </span>
-#    </button>
+function agregarProducto(id, nombre, precio) {
+  productoSeleccionado = id;
+  productoNombre = nombre;
+  productoPrecio = precio;
+  document.getElementById('modal-producto-nombre').innerText = nombre;
+  document.getElementById('observaciones').value = '';
+  document.getElementById('modal').style.display = 'block';
+}
 
+function cerrarModal() {
+  document.getElementById('modal').style.display = 'none';
+}
 
-#            <button class="boton">
-#        <img src="{% static 'css/logo.png' %}" alt="cocktel" width="75" height="75">
-#        <span>{{ Texto }} </span>
-#    </button>
+function enviarProducto() {
+  const observaciones = document.getElementById('observaciones').value;
 
-    
-#            <button class="boton">
-#        <img src="{% static 'css/logo.png' %}" alt="cocktel" width="75" height="75">
-#        <span>{{ Texto }} </span>
-#    </button>
+  // Añade producto localmente (sin backend)
+  ticket.push({
+    producto: productoNombre,
+    precio: productoPrecio,
+    observaciones: observaciones || null,
+    cantidad: 1
+  });
 
-#            <button class="boton">
-#        <img src="{% static 'css/logo.png' %}" alt="cocktel" width="75" height="75">
-#        <span>{{ Texto }} </span>
-#    </button>
+  cerrarModal();
+  actualizarTicket();
+}
 
-<title>ENTRADAS</title>
-  <style>
+function actualizarTicket() {
+  const ticketDiv = document.getElementById('ticket-contenido');
+  const totalSpan = document.getElementById('ticket-total');
 
-    table {
-      width: 500px;
-      height: 300px;
-      border-collapse: collapse;
-      position: relative;
-      margin: 30px auto;
-      border: 2px solid #666;
+  let total = 0;
+  let html = '<ul>';
+
+  ticket.forEach(item => {
+    total += item.precio * item.cantidad;
+    html += `<li>${item.cantidad}x ${item.producto} - $${item.precio}`;
+    if (item.observaciones) {
+      html += `<br><small>Obs: ${item.observaciones}</small>`;
     }
+    html += '</li>';
+  });
 
-    td {
-      border: 1px solid #999;
-      position: relative;
-      width: 33%;
-      height: 100px;
-    }
+  html += '</ul>';
+  ticketDiv.innerHTML = html;
+  totalSpan.innerText = total.toFixed(2);
+}
+</script>
 
-    .img-btn {
-      position: absolute;
-      width: 50px;
-      height: 50px;
-      cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-
-    .img-btn:hover {
-      transform: scale(1.2);
-    }
-
-    .img1 { top: 10px; left: 10px; }
-    .img2 { bottom: 10px; right: 10px; }
-    .img3 { top: 10px; right: 10px; }
-  </style>
-</head>
-<body>
-
-<h2 style="text-align: center;">Tabla con Imágenes Interactivas</h2>
-
-<table>
-  <tr>
-    <td>
-      <a href="{% url 'accion' 1 %}">
-        <img src="{% static 'css/logo.png' %}" class="img-btn img1" alt="Botón 1">
-      </a>
-    </td>
-    <td>
-      <a href="{% url 'accion' 2 %}">
-        <img src="{% static 'css/logo.png' %}" class="img-btn img2" alt="Botón 2">
-      </a>
-    </td>
-    <td>
-      <a href="{% url 'accion' 3 %}">
-        <img src="{% static 'css/logo.png' %}" class="img-btn img3" alt="Botón 3">
-      </a>
-    </td>
-  </tr>
-</table>
-
-</body>
-
-
-
-
-
+<style>
+.container {
+  display: flex;
+  gap: 20px;
+}
+.menu-section, .ticket-section {
+  width: 50%;
+  padding: 20px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+}
+.ticket-section {
+  background-color: #fffbea;
+}
+button {
+  margin-left: 10px;
+  padding: 4px 10px;
+  background-color: #0077b6;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+button:hover {
+  background-color: #023e8a;
+}
+h3 {
+  margin-top: 15px;
+}
+</style>
 {% endblock %}

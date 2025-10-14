@@ -2,9 +2,11 @@ import re
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.utils.timezone import datetime
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth import login, logout, authenticate
-from django.contrib
+from django.contrib import messages  # Para usar mensajes flash
+from django.contrib.auth.decorators import login_required
+from .models import Categoria, Producto, Pedido, ItemPedido
 #from django.http import HttpResponse
 
 layout= """
@@ -61,7 +63,50 @@ def INVENTARIO (request):
     return render(request,'INVENTARIO.html')   
 
 def ORDEN (request):
-    return render(request,'ORDEN.html')   
+    categorias=Categoria.objects.prefetch_related('producto_set')
+    return render(request,'ORDEN.html',{'categorias':categorias})   
+
+def menu_view(request):
+    categorias = Categoria.objects.prefetch_related('producto_set')
+    return render(request, 'menu.html', {'categorias': categorias})
+
+def agregar_item(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        pedido, _ = Pedido.objects.get_or_create(numero_cliente=data['numero_cliente'])
+        producto = Producto.objects.get(id=data['producto_id'])
+        item = ItemPedido.objects.create(
+            pedido=pedido,
+            producto=producto,
+            observaciones=data.get('observaciones', ''),
+            cantidad=data.get('cantidad', 1)
+        )
+        return JsonResponse({'status': 'ok'})
+
+def obtener_ticket(request, numero_cliente):
+    pedido = Pedido.objects.filter(numero_cliente=numero_cliente).last()
+    if not pedido:
+        return JsonResponse({'items': []})
+
+    items = pedido.items.all()
+    items_data = [{
+        'producto': item.producto.nombre,
+        'cantidad': item.cantidad,
+        'precio': str(item.producto.precio),
+        'observaciones': item.observaciones
+    } for item in items]
+
+    return JsonResponse({'items': items_data})
+
+    items = [{
+        'producto': item.producto.nombre,
+        'cantidad': item.cantidad,
+        'observaciones': item.observaciones,
+        'precio': item.producto.precio
+    } for item in pedido.items.all()]
+
+    return JsonResponse({'items': items})
+
 
 def save_articulo(request):
     articulo=Article(
@@ -132,6 +177,10 @@ def login_request(request):
 
     form= AuthenticationForm()
     return render(request, "login.html", {'form': form})
+
+
+
+
     
 #MVC MODELO VISTA CONTROLADOR
 #MVT MODELO TEMPLATE VISTA
