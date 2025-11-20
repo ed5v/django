@@ -1,4 +1,5 @@
 import re
+import json
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.utils.timezone import datetime
@@ -44,12 +45,15 @@ layout= """
 """def index(request):
     return render(request,'index.html')"""
 
+@login_required
 def AUDITORIA (request):
     return render(request,'AUDITORIA.html')   
 
+@login_required
 def CAJA (request):
     return render(request,'CAJA.html')
 
+@login_required
 def CUENTA (request):
     return render(request,'CUENTA.html')
 
@@ -59,6 +63,7 @@ def INDEX (request):
 def INICIO (request):
     return render(request,'INICIO.html')   
 
+@login_required
 def INVENTARIO (request):
     return render(request,'INVENTARIO.html')   
 
@@ -139,7 +144,7 @@ from django.shortcuts import render
 def boton(request):
     imagen='logo.png'
     texto= 'texto del botón'
-    return render(request, 'orden.html', {'imagen': imagen, 'texto': texto})
+    return render(request, 'ORDEN.html', {'imagen': imagen, 'texto': texto})
 
 #def tabla_menu(request):
     #return render(request, 'SIRENITA/tabla.html')
@@ -156,27 +161,24 @@ def agregar_orden(request, numero):
 def logout_request(request):
     logout(request)
     messages.info(request, "Sesión finalizada")
-    return redirect("INICIO.html")
+    return redirect("INICIO")
 
 def login_request(request):
+    if request.method == "POST":
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            usuario = form.cleaned_data['username']
+            contrasena = form.cleaned_data['password']
+            user = authenticate(username=usuario, password=contrasena)
 
-    if request.method=="POST":
-        form= AuthenticationForm(request, data=request.post)
-        if form.is__valid():
-            usuario= form.cleaned_data.get('username')
-            contrasena= form.cleaned_data.get('password')
-            user=authenticate(username=usuario, password=contrasena)
-            if user is not None:
+            if user:
                 login(request, user)
-                messages.info(request, f"Bienvenido {usuario}")
-                return redirect("INICIO.html")
-            else:
-                messages.error(request, "Usuario o contraseña incorrecta")
-        else:
-            messages.error(request, "Usuario o contraseña incorrecta")
+                messages.success(request, f"Bienvenido {usuario}")
+                return redirect("INICIO")
+        messages.error(request, "Usuario o contraseña inválidos")
 
-    form= AuthenticationForm()
-    return render(request, "login.html", {'form': form})
+    form = AuthenticationForm()
+    return render(request, "login.html", {"form": form})
 
 
 
