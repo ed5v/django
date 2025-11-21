@@ -1,0 +1,39 @@
+{% extends 'base_recetas.html' %}
+{% block title %}Recetas{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between mb-3">
+    <h2>Lista de Recetas</h2>
+    <a class="btn btn-success" href="{% url 'crear_receta' %}">
+        ➕ Nueva Receta
+    </a>
+</div>
+
+{% if recetas %}
+<div class="row">
+    {% for r in recetas %}
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                {% if r.fotos.first %}
+                    <img src="{{ r.fotos.first.imagen.url }}" class="card-img-top" style="height:200px; object-fit:cover;">
+                {% else %}
+                    <div class="bg-secondary text-white p-5 text-center">Sin foto</div>
+                {% endif %}
+
+                <div class="card-body">
+                    <h5 class="card-title">{{ r.titulo }}</h5>
+                    <p class="text-muted">{{ r.categoria }}</p>
+
+                    <a href="{% url 'ver_receta' r.id %}" class="btn btn-primary btn-sm">Ver</a>
+                    <a href="{% url 'editar_receta' r.id %}" class="btn btn-warning btn-sm">Editar</a>
+                    <a href="{% url 'eliminar_receta' r.id %}" class="btn btn-danger btn-sm">Eliminar</a>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info">No hay recetas registradas.</div>
+{% endif %}
+
+{% endblock %}

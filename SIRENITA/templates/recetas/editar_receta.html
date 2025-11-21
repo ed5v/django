@@ -1,0 +1,59 @@
+{% extends 'base_recetas.html' %}
+{% block title %}Editar {{ receta.titulo }}{% endblock %}
+
+{% block content %}
+<h2>Editar Receta</h2>
+<hr>
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <h4>Datos Generales</h4>
+    <div class="card p-3 mb-4">
+        {{ form.as_p }}
+    </div>
+
+    <h4>Ingredientes</h4>
+    <div class="card p-3 mb-4">
+        {{ ingredientes_formset.management_form }}
+        {% for f in ingredientes_formset %}
+            <div class="border p-2 mb-2 bg-light">
+                {{ f.as_p }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <h4>Pasos</h4>
+    <div class="card p-3 mb-4">
+        {{ pasos_formset.management_form }}
+        {% for f in pasos_formset %}
+            <div class="border p-2 mb-2 bg-light">
+                {{ f.as_p }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <h4>Fotos</h4>
+    <div class="card p-3 mb-4">
+        {{ fotos_formset.management_form }}
+        {% for f in fotos_formset %}
+            <div class="border p-2 mb-2 bg-light">
+                {{ f.as_p }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <h4>Información Nutricional</h4>
+    <div class="card p-3 mb-4">
+        {{ nutricion_formset.management_form }}
+        {% for f in nutricion_formset %}
+            <div class="border p-2 mb-2 bg-light">
+                {{ f.as_p }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <button class="btn btn-primary">Actualizar Receta</button>
+</form>
+
+{% endblock %}

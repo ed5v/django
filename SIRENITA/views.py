@@ -8,6 +8,14 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages  # Para usar mensajes flash
 from django.contrib.auth.decorators import login_required
 from .models import Categoria, Producto, Pedido, ItemPedido
+from .models import Receta, Ingrediente, Paso, FotoReceta, InfoNutricional
+from .forms import (
+    RecetaForm,
+    IngredientesFormSet,
+    PasosFormSet,
+    FotosFormSet,
+    NutricionalFormSet
+)
 #from django.http import HttpResponse
 
 layout= """
@@ -44,6 +52,119 @@ layout= """
 
 """def index(request):
     return render(request,'index.html')"""
+
+@login_required
+def lista_recetas(request):
+    recetas = Receta.objects.all().order_by("-created_at")
+    return render(request, "recetas/lista_recetas.html", {"recetas": recetas})
+
+@login_required
+def detalle_receta(request, pk):
+    receta = Receta.objects.get(pk=pk)
+    return render(request, "recetas/detalle_receta.html", {"receta": receta})
+
+@login_required
+def crear_receta(request):
+    receta = Receta()
+
+    if request.method == "POST":
+        form = RecetaForm(request.POST)
+        ingredientes_formset = IngredientesFormSet(request.POST, instance=receta)
+        pasos_formset = PasosFormSet(request.POST, instance=receta)
+        fotos_formset = FotosFormSet(request.POST, request.FILES, instance=receta)
+        nutricion_formset = NutricionalFormSet(request.POST, instance=receta)
+
+        if (
+            form.is_valid()
+            and ingredientes_formset.is_valid()
+            and pasos_formset.is_valid()
+            and fotos_formset.is_valid()
+            and nutricion_formset.is_valid()
+        ):
+            receta = form.save()
+
+            # Se asigna la receta a todos los formsets
+            ingredientes_formset.instance = receta
+            pasos_formset.instance = receta
+            fotos_formset.instance = receta
+            nutricion_formset.instance = receta
+
+            ingredientes_formset.save()
+            pasos_formset.save()
+            fotos_formset.save()
+            nutricion_formset.save()
+
+            messages.success(request, "Receta creada correctamente")
+            return redirect("lista_recetas")
+
+    else:
+        form = RecetaForm()
+        ingredientes_formset = IngredientesFormSet(instance=receta)
+        pasos_formset = PasosFormSet(instance=receta)
+        fotos_formset = FotosFormSet(instance=receta)
+        nutricion_formset = NutricionalFormSet(instance=receta)
+
+    return render(request, "recetas/crear_receta.html", {
+        "form": form,
+        "ingredientes_formset": ingredientes_formset,
+        "pasos_formset": pasos_formset,
+        "fotos_formset": fotos_formset,
+        "nutricion_formset": nutricion_formset,
+    })
+
+@login_required
+def editar_receta(request, pk):
+    receta = Receta.objects.get(pk=pk)
+
+    if request.method == "POST":
+        form = RecetaForm(request.POST, instance=receta)
+        ingredientes_formset = IngredientesFormSet(request.POST, instance=receta)
+        pasos_formset = PasosFormSet(request.POST, instance=receta)
+        fotos_formset = FotosFormSet(request.POST, request.FILES, instance=receta)
+        nutricion_formset = NutricionalFormSet(request.POST, instance=receta)
+
+        if (
+            form.is_valid()
+            and ingredientes_formset.is_valid()
+            and pasos_formset.is_valid()
+            and fotos_formset.is_valid()
+            and nutricion_formset.is_valid()
+        ):
+            form.save()
+            ingredientes_formset.save()
+            pasos_formset.save()
+            fotos_formset.save()
+            nutricion_formset.save()
+
+            messages.success(request, "Receta actualizada correctamente")
+            return redirect("lista_recetas")
+
+    else:
+        form = RecetaForm(instance=receta)
+        ingredientes_formset = IngredientesFormSet(instance=receta)
+        pasos_formset = PasosFormSet(instance=receta)
+        fotos_formset = FotosFormSet(instance=receta)
+        nutricion_formset = NutricionalFormSet(instance=receta)
+
+    return render(request, "recetas/editar_receta.html", {
+        "form": form,
+        "ingredientes_formset": ingredientes_formset,
+        "pasos_formset": pasos_formset,
+        "fotos_formset": fotos_formset,
+        "nutricion_formset": nutricion_formset,
+        "receta": receta,
+    })
+
+@login_required
+def eliminar_receta(request, pk):
+    receta = Receta.objects.get(pk=pk)
+
+    if request.method == "POST":
+        receta.delete()
+        messages.success(request, "Receta eliminada")
+        return redirect("lista_recetas")
+
+    return render(request, "recetas/eliminar_receta.html", {"receta": receta})
 
 @login_required
 def AUDITORIA (request):
@@ -181,7 +302,50 @@ def login_request(request):
     return render(request, "login.html", {"form": form})
 
 
+def crear_receta(request):
+    receta = Receta()
 
+    if request.method == "POST":
+        form = RecetaForm(request.POST)
+        ingredientes_formset = IngredientesFormSet(request.POST, instance=receta)
+        pasos_formset = PasosFormSet(request.POST, instance=receta)
+        fotos_formset = FotosFormSet(request.POST, request.FILES, instance=receta)
+        nutricion_formset = NutricionalFormSet(request.POST, instance=receta)
+
+        if (
+            form.is_valid() and
+            ingredientes_formset.is_valid() and
+            pasos_formset.is_valid() and
+            fotos_formset.is_valid() and
+            nutricion_formset.is_valid()
+        ):
+            receta = form.save()
+            ingredientes_formset.instance = receta
+            pasos_formset.instance = receta
+            fotos_formset.instance = receta
+            nutricion_formset.instance = receta
+
+            ingredientes_formset.save()
+            pasos_formset.save()
+            fotos_formset.save()
+            nutricion_formset.save()
+
+            return redirect("lista_recetas")  # o donde tú quieras
+
+    else:
+        form = RecetaForm()
+        ingredientes_formset = IngredientesFormSet(instance=receta)
+        pasos_formset = PasosFormSet(instance=receta)
+        fotos_formset = FotosFormSet(instance=receta)
+        nutricion_formset = NutricionalFormSet(instance=receta)
+
+    return render(request, "recetas/crear_receta.html", {
+        "form": form,
+        "ingredientes_formset": ingredientes_formset,
+        "pasos_formset": pasos_formset,
+        "fotos_formset": fotos_formset,
+        "nutricion_formset": nutricion_formset,
+    })
 
     
 #MVC MODELO VISTA CONTROLADOR
