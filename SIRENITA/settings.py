@@ -1,0 +1,3 @@
+LOGIN_URL = '/login'
+LOGIN_REDIRECT_URL = '/INICIO'
+LOGOUT_REDIRECT_URL = '/login'

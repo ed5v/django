@@ -2,10 +2,10 @@
 
 {% block content %} 
 
-<form action="" method="post">
+<form method="POST" action="{% url 'login' %}">
     {% csrf_token %}
     {{ form.as_p }}
-    <button class="btn" type="submit"> Iniciar Sesión </button>
-    </form>
+    <button type="submit">Iniciar sesión</button>
+</form>
 
 {% endblock %}

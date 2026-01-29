@@ -8,7 +8,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages  # Para usar mensajes flash
 from django.contrib.auth.decorators import login_required
 from .models import Categoria, Producto, Pedido, ItemPedido
-from .models import Receta, Ingrediente, Paso, FotoReceta, InfoNutricional
+from .models import Receta, Ingrediente, PasoPreparacion, Foto, Nutricional
 from .forms import (
     RecetaForm,
     IngredientesFormSet,
@@ -16,6 +16,9 @@ from .forms import (
     FotosFormSet,
     NutricionalFormSet
 )
+from django.contrib.auth import authenticate, login
+from django.shortcuts import render, redirect
+from .decorators import admin_required
 #from django.http import HttpResponse
 
 layout= """
@@ -54,16 +57,19 @@ layout= """
     return render(request,'index.html')"""
 
 @login_required
+@admin_required
 def lista_recetas(request):
     recetas = Receta.objects.all().order_by("-created_at")
     return render(request, "recetas/lista_recetas.html", {"recetas": recetas})
 
 @login_required
+@admin_required
 def detalle_receta(request, pk):
     receta = Receta.objects.get(pk=pk)
     return render(request, "recetas/detalle_receta.html", {"receta": receta})
 
 @login_required
+@admin_required
 def crear_receta(request):
     receta = Receta()
 
@@ -113,6 +119,7 @@ def crear_receta(request):
     })
 
 @login_required
+@admin_required
 def editar_receta(request, pk):
     receta = Receta.objects.get(pk=pk)
 
@@ -156,6 +163,7 @@ def editar_receta(request, pk):
     })
 
 @login_required
+@admin_required
 def eliminar_receta(request, pk):
     receta = Receta.objects.get(pk=pk)
 
@@ -167,14 +175,17 @@ def eliminar_receta(request, pk):
     return render(request, "recetas/eliminar_receta.html", {"receta": receta})
 
 @login_required
+@admin_required
 def AUDITORIA (request):
     return render(request,'AUDITORIA.html')   
 
 @login_required
+@admin_required
 def CAJA (request):
     return render(request,'CAJA.html')
 
 @login_required
+@admin_required
 def CUENTA (request):
     return render(request,'CUENTA.html')
 
@@ -185,6 +196,7 @@ def INICIO (request):
     return render(request,'INICIO.html')   
 
 @login_required
+@admin_required
 def INVENTARIO (request):
     return render(request,'INVENTARIO.html')   
 
@@ -287,16 +299,20 @@ def logout_request(request):
 def login_request(request):
     if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            usuario = form.cleaned_data['username']
-            contrasena = form.cleaned_data['password']
-            user = authenticate(username=usuario, password=contrasena)
 
-            if user:
+        if form.is_valid():
+            username = form.cleaned_data.get("username")
+            password = form.cleaned_data.get("password")
+
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
                 login(request, user)
-                messages.success(request, f"Bienvenido {usuario}")
                 return redirect("INICIO")
-        messages.error(request, "Usuario o contraseña inválidos")
+
+        return render(request, "login.html", {
+            "form": form,
+            "error": "Usuario o contraseña incorrectos"
+        })
 
     form = AuthenticationForm()
     return render(request, "login.html", {"form": form})
