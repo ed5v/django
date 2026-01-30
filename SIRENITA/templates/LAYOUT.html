@@ -90,6 +90,32 @@
         html {
             scroll-behavior: smooth;
         }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            nav ul li a {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .box {
+                border-radius: 8px;
+            }
+            
+            /* Touch-friendly buttons */
+            button, .boton {
+                min-height: 44px;
+                min-width: 44px;
+            }
+        }
+        
+        /* Improve mobile menu button visibility */
+        #mobile-menu-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+        }
     </style>
 </head>
 
@@ -97,13 +123,13 @@
 
     <!-- HEADER -->
     <header class="header-gradient shadow-lg">
-        <div class="container mx-auto px-6 py-5">
-            <div id="logotipo" class="flex items-center gap-6 text-white">
+        <div class="container mx-auto px-4 sm:px-6 py-4 sm:py-5">
+            <div id="logotipo" class="flex items-center gap-3 sm:gap-6 text-white">
                 <!-- Logo a la izquierda -->
-                <img src="{% static 'css/logo.png' %}" alt="Logo de Marisquería La Sirenita" class="w-20 h-20 transition-transform hover:scale-110" />
+                <img src="{% static 'css/logo.png' %}" alt="Logo de Marisquería La Sirenita" class="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 transition-transform hover:scale-110" />
                 <div class="flex-1 text-center">
-                    <h1 class="text-4xl font-bold tracking-wide" style="color: var(--color-gold);">BIENVENIDO</h1>
-                    <p class="text-sm text-gray-300 mt-1">MARISQUERÍA LA SIRENITA</p>
+                    <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold tracking-wide" style="color: var(--color-gold);">BIENVENIDO</h1>
+                    <p class="text-xs sm:text-sm text-gray-300 mt-1">MARISQUERÍA LA SIRENITA</p>
                 </div>
             </div>
         </div>
@@ -111,26 +137,53 @@
 
     <!-- NAV -->
     <nav class="nav-gradient shadow-xl sticky top-0 z-50">
-        <ul class="container mx-auto px-6 flex flex-wrap justify-center items-center list-none">
+        <div class="container mx-auto px-6">
+            <!-- Hamburger Menu Button (Mobile) -->
+            <button id="mobile-menu-button" class="md:hidden text-white p-2 focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+            
+            <!-- Desktop Menu -->
+            <ul id="nav-menu" class="hidden md:flex flex-wrap justify-center items-center list-none">
+            {% if user.is_authenticated %}
+                <li><a href="/INICIO" class="font-semibold">INICIO</a></li>
+                <li><a href="/ORDEN" class="font-semibold">ORDEN</a></li>
+                <li><a href="/CUENTA" class="font-semibold">CUENTA</a></li>
+                <li><a href="/INVENTARIO" class="font-semibold">INVENTARIO</a></li>
+                <li><a href="/AUDITORIA" class="font-semibold">AUDITORIA</a></li>
+                <li><a href="/CAJA" class="font-semibold">CAJA</a></li>
+                <li><a href="/logout" class="font-semibold">CERRAR SESIÓN</a></li>
+            {% else %}
+                <li><a href="/login" class="font-semibold">INICIAR SESIÓN</a></li>
+            {% endif %}
+            </ul>
+        </div>
+    </nav>
+    
+    <!-- Mobile Menu Dropdown -->
+    <div id="mobile-menu" class="hidden md:hidden nav-gradient shadow-lg">
+        <ul class="list-none">
         {% if user.is_authenticated %}
-            <li><a href="/INICIO" class="font-semibold">INICIO</a></li>
-            <li><a href="/ORDEN" class="font-semibold">ORDEN</a></li>
-            <li><a href="/CUENTA" class="font-semibold">CUENTA</a></li>
-            <li><a href="/INVENTARIO" class="font-semibold">INVENTARIO</a></li>
-            <li><a href="/AUDITORIA" class="font-semibold">AUDITORIA</a></li>
-            <li><a href="/CAJA" class="font-semibold">CAJA</a></li>
-            <li><a href="/logout" class="font-semibold">CERRAR SESIÓN</a></li>
+            <li><a href="/INICIO" class="block font-semibold px-6 py-3 border-b border-gray-700">INICIO</a></li>
+            <li><a href="/ORDEN" class="block font-semibold px-6 py-3 border-b border-gray-700">ORDEN</a></li>
+            <li><a href="/CUENTA" class="block font-semibold px-6 py-3 border-b border-gray-700">CUENTA</a></li>
+            <li><a href="/INVENTARIO" class="block font-semibold px-6 py-3 border-b border-gray-700">INVENTARIO</a></li>
+            <li><a href="/AUDITORIA" class="block font-semibold px-6 py-3 border-b border-gray-700">AUDITORIA</a></li>
+            <li><a href="/CAJA" class="block font-semibold px-6 py-3 border-b border-gray-700">CAJA</a></li>
+            <li><a href="/logout" class="block font-semibold px-6 py-3">CERRAR SESIÓN</a></li>
         {% else %}
-            <li><a href="/login" class="font-semibold">INICIAR SESIÓN</a></li>
+            <li><a href="/login" class="block font-semibold px-6 py-3">INICIAR SESIÓN</a></li>
         {% endif %}
         </ul>
-    </nav>
+    </div>
 
     <!-- CONTENIDO -->
-    <div id="content" class="container mx-auto px-6 py-8">
+    <div id="content" class="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <!-- Caja con fondo blanco → texto negro -->
-        <div class="box bg-white p-8 text-black">
-            <h2 class="title text-3xl font-bold mb-6">
+        <div class="box bg-white p-4 sm:p-6 md:p-8 text-black">
+            <h2 class="title text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">
                 {% block page_title %}{% endblock %}
             </h2>
 
@@ -140,10 +193,24 @@
     </div>
 
     <!-- FOOTER -->
-    <footer class="header-gradient text-white text-center py-6 shadow-inner mt-auto">
-        <p class="text-sm">LA SIRENITA &copy; {% now "Y" %}</p>
+    <footer class="header-gradient text-white text-center py-4 sm:py-6 shadow-inner mt-auto">
+        <p class="text-xs sm:text-sm">LA SIRENITA &copy; {% now "Y" %}</p>
         <p class="text-xs text-gray-300 mt-1">Sistema de Punto de Venta</p>
     </footer>
+
+    <!-- Mobile Menu Toggle Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuButton) {
+                mobileMenuButton.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+        });
+    </script>
 
 </body>
 </html>
