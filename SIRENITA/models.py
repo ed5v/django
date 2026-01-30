@@ -55,6 +55,30 @@ class ItemPedido(models.Model):
 
 
 # ===========================================
+#        REGISTRO DE PEDIDOS SOLICITADOS
+# ===========================================
+class RegistroPedido(models.Model):
+    """Tabla para registrar pedidos solicitados y gestionar pagos"""
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    ticket = models.ForeignKey(Pedido, on_delete=models.CASCADE)
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
+    categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE)
+    cantidad = models.PositiveIntegerField(default=1)
+    precio_unitario = models.DecimalField(max_digits=8, decimal_places=2)
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2)
+    fecha = models.DateTimeField(auto_now_add=True)
+    observaciones = models.TextField(blank=True, null=True)
+    pagado = models.BooleanField(default=False)
+    
+    class Meta:
+        db_table = 'tbl_registro_pedidos'
+        ordering = ['-fecha']
+    
+    def __str__(self):
+        return f"Registro #{self.id} - Ticket #{self.ticket.id} - {self.producto.nombre}"
+
+
+# ===========================================
 #               RECETARIO (NUEVO)
 # ===========================================
 class Ingrediente(models.Model):

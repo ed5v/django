@@ -165,6 +165,11 @@
     </div>
     <hr>
     <h3>Total: $<span id="ticket-total">0</span></h3>
+    <div style="margin-top: 20px; text-align: center;">
+        <button onclick="solicitarPedido()" class="btn-solicitar" id="btn-solicitar">
+            📋 SOLICITAR PEDIDO
+        </button>
+    </div>
   </div>
 </div>
 
@@ -284,6 +289,49 @@ function actualizarTicket() {
   totalSpan.innerText = total.toFixed(2);
 }
 
+function solicitarPedido() {
+  const btnSolicitar = document.getElementById('btn-solicitar');
+  
+  if(ticket.length === 0) {
+      alert('No hay productos en el ticket para solicitar');
+      return;
+  }
+  
+  if(confirm('¿Está seguro de solicitar este pedido? Se registrará para gestión de pago.')) {
+      btnSolicitar.disabled = true;
+      btnSolicitar.textContent = 'Procesando...';
+      
+      fetch('{% url "solicitar_pedido" %}', {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": "{{ csrf_token }}"
+          },
+          body: JSON.stringify({
+              ticket_id: TICKET_ID
+          })
+      })
+      .then(response => response.json())
+      .then(data => {
+          if(data.status === 'ok') {
+              alert(data.message || 'Pedido solicitado exitosamente');
+              // Redirigir a la lista de registros o recargar
+              window.location.href = '{% url "ORDEN" %}';
+          } else {
+              alert('Error al solicitar: ' + (data.message || 'Error desconocido'));
+              btnSolicitar.disabled = false;
+              btnSolicitar.textContent = '📋 SOLICITAR PEDIDO';
+          }
+      })
+      .catch(error => {
+          console.error('Error:', error);
+          alert('Error de conexión al solicitar el pedido.');
+          btnSolicitar.disabled = false;
+          btnSolicitar.textContent = '📋 SOLICITAR PEDIDO';
+      });
+  }
+}
+
 document.addEventListener('keydown', function(event) {
   if (event.key === 'Escape') {
     const modal = document.getElementById('modal');
@@ -364,6 +412,34 @@ button:hover {
 button:active {
   transform: translateY(0);
 }
+
+.btn-solicitar {
+  width: 100%;
+  padding: 15px 30px;
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(255, 107, 53, 0.3);
+  margin-left: 0;
+}
+
+.btn-solicitar:hover {
+  background: linear-gradient(135deg, #f7931e 0%, #ff6b35 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(255, 107, 53, 0.5);
+}
+
+.btn-solicitar:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
 h2 {
   color: #023e8a;
   margin-bottom: 15px;
