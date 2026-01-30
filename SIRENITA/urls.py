@@ -24,6 +24,9 @@ urlpatterns = [
     path('ORDEN/', views.ORDEN, name='ORDEN'),
     path('crear_ticket/', views.crear_ticket, name='crear_ticket'),
     path('agregar_item/', views.agregar_item, name='agregar_item'),
+    path('solicitar_pedido/', views.solicitar_pedido, name='solicitar_pedido'),
+    path('registros_pedidos/', views.listar_registros_pedidos, name='listar_registros_pedidos'),
+    path('marcar_pagado/<int:registro_id>/', views.marcar_pagado, name='marcar_pagado'),
     path('accion/<int:numero>/', views.agregar_orden, name='accion'),
     path('api/ticket/<int:numero_cliente>/', views.obtener_ticket, name='obtener_ticket'),
 

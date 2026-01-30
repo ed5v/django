@@ -160,11 +160,30 @@
     <div id="ticket-info-extra" style="font-size:0.85rem; color:#666; margin-bottom:10px;">
         Usuario: {{ ticket_actual.usuario.username|default:"Sistema" }} | {{ ticket_actual.creado|date:"d/m H:i" }}
     </div>
-    <div id="ticket-contenido">
-      <!-- Ticket dinámico se genera aquí -->
+    
+    <!-- Sección de artículos solicitados -->
+    <div id="seccion-solicitados" style="margin-bottom: 20px;">
+      <h3 style="color: #28a745; border-bottom: 2px solid #28a745;">✓ Artículos Solicitados</h3>
+      <div id="ticket-solicitados" style="background: #f0fff0; padding: 10px; border-radius: 8px; min-height: 50px;">
+        <!-- Items solicitados dinámicos -->
+      </div>
     </div>
+    
+    <!-- Sección de nuevas entradas -->
+    <div id="seccion-nuevos" style="margin-bottom: 20px;">
+      <h3 style="color: #ff6b35; border-bottom: 2px solid #ff6b35;">🆕 Nuevas Entradas al Ticket</h3>
+      <div id="ticket-nuevos" style="background: #fffbea; padding: 10px; border-radius: 8px; min-height: 50px;">
+        <!-- Items nuevos dinámicos -->
+      </div>
+    </div>
+    
     <hr>
     <h3>Total: $<span id="ticket-total">0</span></h3>
+    <div style="margin-top: 20px; text-align: center;">
+        <button onclick="solicitarPedido()" class="btn-solicitar" id="btn-solicitar">
+            📋 SOLICITAR PEDIDO
+        </button>
+    </div>
   </div>
 </div>
 
@@ -184,14 +203,32 @@ const TICKET_ID = {{ ticket_actual.id }};
 let productoSeleccionado = null;
 let productoNombre = '';
 let productoPrecio = 0;
-let ticket = [
+let ticketSolicitados = [
     {% for item in ticket_actual.items.all %}
+    {% if item.solicitado %}
     {
+        id: {{ item.id }},
         producto: "{{ item.producto.nombre }}",
         precio: {{ item.producto.precio }},
         cantidad: {{ item.cantidad }},
-        observaciones: "{{ item.observaciones|escapejs }}"
+        observaciones: "{{ item.observaciones|escapejs }}",
+        solicitado: true
     }{% if not forloop.last %},{% endif %}
+    {% endif %}
+    {% endfor %}
+];
+let ticketNuevos = [
+    {% for item in ticket_actual.items.all %}
+    {% if not item.solicitado %}
+    {
+        id: {{ item.id }},
+        producto: "{{ item.producto.nombre }}",
+        precio: {{ item.producto.precio }},
+        cantidad: {{ item.cantidad }},
+        observaciones: "{{ item.observaciones|escapejs }}",
+        solicitado: false
+    }{% if not forloop.last %},{% endif %}
+    {% endif %}
     {% endfor %}
 ];
 let lastFocusedElement = null;
@@ -245,11 +282,12 @@ function enviarProducto() {
   .then(response => response.json())
   .then(data => {
       if(data.status === 'ok') {
-          ticket.push({
+          ticketNuevos.push({
             producto: productoNombre,
             precio: productoPrecio,
             observaciones: observaciones || null,
-            cantidad: 1
+            cantidad: 1,
+            solicitado: false
           });
           actualizarTicket();
           cerrarModal();
@@ -264,24 +302,100 @@ function enviarProducto() {
 }
 
 function actualizarTicket() {
-  const ticketDiv = document.getElementById('ticket-contenido');
+  const ticketSolicitadosDiv = document.getElementById('ticket-solicitados');
+  const ticketNuevosDiv = document.getElementById('ticket-nuevos');
   const totalSpan = document.getElementById('ticket-total');
 
   let total = 0;
-  let html = '<ul>';
+  
+  // Renderizar items solicitados
+  let htmlSolicitados = '<ul style="list-style: none; padding: 0; margin: 0;">';
+  if (ticketSolicitados.length > 0) {
+    ticketSolicitados.forEach(item => {
+      total += item.precio * item.cantidad;
+      htmlSolicitados += `<li style="padding: 8px 0; border-bottom: 1px solid #d4edda; color: #155724;">
+        <strong>${item.cantidad}x ${item.producto}</strong> - $${item.precio}`;
+      if (item.observaciones) {
+        htmlSolicitados += `<br><small style="color: #666;">Obs: ${item.observaciones}</small>`;
+      }
+      htmlSolicitados += '</li>';
+    });
+  } else {
+    htmlSolicitados += '<li style="color: #999; font-style: italic; padding: 10px;">No hay artículos solicitados aún</li>';
+  }
+  htmlSolicitados += '</ul>';
+  ticketSolicitadosDiv.innerHTML = htmlSolicitados;
+  
+  // Renderizar items nuevos
+  let htmlNuevos = '<ul style="list-style: none; padding: 0; margin: 0;">';
+  if (ticketNuevos.length > 0) {
+    ticketNuevos.forEach(item => {
+      total += item.precio * item.cantidad;
+      htmlNuevos += `<li style="padding: 8px 0; border-bottom: 1px solid #ffe0b2; color: #e65100;">
+        <strong>${item.cantidad}x ${item.producto}</strong> - $${item.precio}`;
+      if (item.observaciones) {
+        htmlNuevos += `<br><small style="color: #666;">Obs: ${item.observaciones}</small>`;
+      }
+      htmlNuevos += '</li>';
+    });
+  } else {
+    htmlNuevos += '<li style="color: #999; font-style: italic; padding: 10px;">No hay nuevas entradas</li>';
+  }
+  htmlNuevos += '</ul>';
+  ticketNuevosDiv.innerHTML = htmlNuevos;
 
-  ticket.forEach(item => {
-    total += item.precio * item.cantidad;
-    html += `<li>${item.cantidad}x ${item.producto} - $${item.precio}`;
-    if (item.observaciones) {
-      html += `<br><small>Obs: ${item.observaciones}</small>`;
-    }
-    html += '</li>';
-  });
-
-  html += '</ul>';
-  ticketDiv.innerHTML = html;
   totalSpan.innerText = total.toFixed(2);
+}
+
+function solicitarPedido() {
+  const btnSolicitar = document.getElementById('btn-solicitar');
+  
+  if(ticketNuevos.length === 0) {
+      alert('No hay nuevas entradas para solicitar');
+      return;
+  }
+  
+  if(confirm('¿Está seguro de solicitar estos productos? Se enviarán a cocina/bar y no podrán modificarse.')) {
+      btnSolicitar.disabled = true;
+      btnSolicitar.textContent = 'Procesando...';
+      
+      fetch('{% url "solicitar_pedido" %}', {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": "{{ csrf_token }}"
+          },
+          body: JSON.stringify({
+              ticket_id: TICKET_ID
+          })
+      })
+      .then(response => response.json())
+      .then(data => {
+          if(data.status === 'ok') {
+              // Mover items de nuevos a solicitados
+              ticketNuevos.forEach(item => {
+                  item.solicitado = true;
+                  ticketSolicitados.push(item);
+              });
+              ticketNuevos = [];
+              
+              alert(data.message || 'Pedido solicitado exitosamente');
+              actualizarTicket();
+              btnSolicitar.disabled = false;
+              btnSolicitar.textContent = '📋 SOLICITAR PEDIDO';
+          } else {
+              alert('Error al solicitar: ' + (data.message || 'Error desconocido'));
+              btnSolicitar.disabled = false;
+              btnSolicitar.textContent = '📋 SOLICITAR PEDIDO';
+          }
+      })
+      .catch(error => {
+          console.error('Error:', error);
+          alert('Error de conexión al solicitar el pedido.');
+          btnSolicitar.disabled = false;
+          btnSolicitar.textContent = '📋 SOLICITAR PEDIDO';
+      });
+  }
 }
 
 document.addEventListener('keydown', function(event) {
@@ -364,6 +478,34 @@ button:hover {
 button:active {
   transform: translateY(0);
 }
+
+.btn-solicitar {
+  width: 100%;
+  padding: 15px 30px;
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(255, 107, 53, 0.3);
+  margin-left: 0;
+}
+
+.btn-solicitar:hover {
+  background: linear-gradient(135deg, #f7931e 0%, #ff6b35 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(255, 107, 53, 0.5);
+}
+
+.btn-solicitar:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
 h2 {
   color: #023e8a;
   margin-bottom: 15px;

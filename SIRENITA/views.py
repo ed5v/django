@@ -7,7 +7,9 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages  # Para usar mensajes flash
 from django.contrib.auth.decorators import login_required
-from .models import Categoria, Producto, Pedido, ItemPedido
+from django.db.models import Sum, Count, Q, F, DecimalField
+from django.db.models.functions import TruncDate
+from .models import Categoria, Producto, Pedido, ItemPedido, RegistroPedido
 from .models import Receta, Ingrediente, PasoPreparacion, Foto, Nutricional
 from .forms import (
     RecetaForm,
@@ -196,6 +198,60 @@ def INICIO (request):
     return render(request,'INICIO.html')   
 
 @login_required
+def SEGUIMIENTO(request):
+    # Total de ventas (solo pedidos completados)
+    total_ventas = Pedido.objects.filter(completado=True).aggregate(
+        total=Sum(F('items__cantidad') * F('items__producto__precio'), output_field=DecimalField())
+    )['total'] or 0
+    
+    # Ventas por usuario
+    ventas_por_usuario = Pedido.objects.filter(completado=True).values(
+        'usuario__username'
+    ).annotate(
+        total=Sum(F('items__cantidad') * F('items__producto__precio'), output_field=DecimalField()),
+        num_pedidos=Count('id')
+    ).order_by('-total')
+    
+    # Productos más vendidos
+    productos_mas_vendidos = ItemPedido.objects.filter(
+        pedido__completado=True
+    ).values(
+        'producto__nombre'
+    ).annotate(
+        cantidad_total=Sum('cantidad'),
+        ingresos=Sum(F('cantidad') * F('producto__precio'), output_field=DecimalField())
+    ).order_by('-cantidad_total')[:10]
+    
+    # Historial de ventas (últimos 30 días)
+    historial_ventas = Pedido.objects.filter(
+        completado=True
+    ).annotate(
+        fecha=TruncDate('creado')
+    ).values('fecha').annotate(
+        total_dia=Sum(F('items__cantidad') * F('items__producto__precio'), output_field=DecimalField()),
+        num_pedidos=Count('id')
+    ).order_by('-fecha')[:30]
+    
+    # Pedidos pendientes (información en tiempo real)
+    pedidos_pendientes = Pedido.objects.filter(completado=False).count()
+    
+    # Pedidos completados hoy
+    from django.utils import timezone
+    hoy = timezone.now().date()
+    pedidos_hoy = Pedido.objects.filter(completado=True, creado__date=hoy).count()
+    
+    context = {
+        'total_ventas': total_ventas,
+        'ventas_por_usuario': ventas_por_usuario,
+        'productos_mas_vendidos': productos_mas_vendidos,
+        'historial_ventas': historial_ventas,
+        'pedidos_pendientes': pedidos_pendientes,
+        'pedidos_hoy': pedidos_hoy,
+    }
+    
+    return render(request, 'SEGUIMIENTO.html', context)
+
+@login_required
 @admin_required
 def INVENTARIO (request):
     return render(request,'INVENTARIO.html')   
@@ -270,17 +326,188 @@ def obtener_ticket(request, numero_cliente):
 
     pedido = qs.first()
     if not pedido:
-        return JsonResponse({'items': []})
+        return JsonResponse({'items_solicitados': [], 'items_nuevos': []})
 
-    items = pedido.items.all()
-    items_data = [{
+    # Separar items solicitados de items nuevos
+    items_solicitados = pedido.items.filter(solicitado=True)
+    items_nuevos = pedido.items.filter(solicitado=False)
+    
+    items_solicitados_data = [{
+        'id': item.id,
         'producto': item.producto.nombre,
         'cantidad': item.cantidad,
         'precio': str(item.producto.precio),
-        'observaciones': item.observaciones
-    } for item in items]
+        'observaciones': item.observaciones,
+        'solicitado': True
+    } for item in items_solicitados]
+    
+    items_nuevos_data = [{
+        'id': item.id,
+        'producto': item.producto.nombre,
+        'cantidad': item.cantidad,
+        'precio': str(item.producto.precio),
+        'observaciones': item.observaciones,
+        'solicitado': False
+    } for item in items_nuevos]
 
-    return JsonResponse({'items': items_data})
+    return JsonResponse({
+        'items_solicitados': items_solicitados_data,
+        'items_nuevos': items_nuevos_data
+    })
+
+@login_required
+def solicitar_pedido(request):
+    """Registra los items del pedido en la tabla de registro para gestión de pagos y envía a impresoras por categoría"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            ticket_id = data.get('ticket_id')
+            
+            # Verificar permisos
+            qs = Pedido.objects.filter(id=ticket_id)
+            if not request.user.is_staff:
+                qs = qs.filter(usuario=request.user)
+            
+            pedido = qs.first()
+            if not pedido:
+                return JsonResponse({'status': 'error', 'message': 'Ticket no encontrado'}, status=404)
+            
+            # Obtener solo los items NO solicitados
+            items_no_solicitados = pedido.items.filter(solicitado=False)
+            
+            if not items_no_solicitados.exists():
+                return JsonResponse({'status': 'error', 'message': 'No hay items nuevos para solicitar'}, status=400)
+            
+            # Registrar todos los items no solicitados en la tabla de registro
+            items_registrados = 0
+            items_comida = []
+            items_bebidas = []
+            
+            for item in items_no_solicitados:
+                # Crear registro
+                RegistroPedido.objects.create(
+                    usuario=request.user,
+                    ticket=pedido,
+                    producto=item.producto,
+                    categoria=item.producto.categoria,
+                    cantidad=item.cantidad,
+                    precio_unitario=item.producto.precio,
+                    subtotal=item.subtotal(),
+                    observaciones=item.observaciones
+                )
+                
+                # Marcar como solicitado
+                item.solicitado = True
+                item.save()
+                
+                items_registrados += 1
+                
+                # Clasificar por categoría para impresión
+                categoria_nombre = item.producto.categoria.nombre.lower()
+                item_info = {
+                    'producto': item.producto.nombre,
+                    'cantidad': item.cantidad,
+                    'observaciones': item.observaciones or ''
+                }
+                
+                if 'comida' in categoria_nombre or 'plato' in categoria_nombre or 'entrada' in categoria_nombre:
+                    items_comida.append(item_info)
+                elif 'bebida' in categoria_nombre or 'drink' in categoria_nombre:
+                    items_bebidas.append(item_info)
+                else:
+                    # Por defecto va a comida
+                    items_comida.append(item_info)
+            
+            # Simular envío a impresoras (aquí deberías integrar tu lógica real de impresión)
+            mensaje_impresion = ""
+            if items_comida:
+                mensaje_impresion += f"✓ {len(items_comida)} items enviados a IMPRESORA 01 (Cocina)\n"
+                # TODO: Aquí agregar código para enviar a impresora 01
+                # print_to_kitchen(items_comida, ticket_id)
+                
+            if items_bebidas:
+                mensaje_impresion += f"✓ {len(items_bebidas)} items enviados a IMPRESORA 02 (Bar)"
+                # TODO: Aquí agregar código para enviar a impresora 02
+                # print_to_bar(items_bebidas, ticket_id)
+            
+            return JsonResponse({
+                'status': 'ok',
+                'message': f'Pedido solicitado exitosamente.\n{mensaje_impresion}',
+                'items_registrados': items_registrados,
+                'items_comida': len(items_comida),
+                'items_bebidas': len(items_bebidas)
+            })
+            
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=400)
+
+@login_required
+def listar_registros_pedidos(request):
+    """Muestra todos los registros de pedidos para gestión de pagos"""
+    if request.user.is_staff:
+        registros = RegistroPedido.objects.select_related(
+            'usuario', 'ticket', 'producto', 'categoria'
+        ).all()
+    else:
+        registros = RegistroPedido.objects.filter(
+            usuario=request.user
+        ).select_related('ticket', 'producto', 'categoria')
+    
+    # Agrupar por ticket
+    tickets_dict = {}
+    for registro in registros:
+        ticket_id = registro.ticket.id
+        if ticket_id not in tickets_dict:
+            tickets_dict[ticket_id] = {
+                'ticket': registro.ticket,
+                'usuario': registro.usuario,
+                'fecha': registro.fecha,
+                'items': [],
+                'total': 0,
+                'pagado': True
+            }
+        tickets_dict[ticket_id]['items'].append(registro)
+        tickets_dict[ticket_id]['total'] += registro.subtotal
+        if not registro.pagado:
+            tickets_dict[ticket_id]['pagado'] = False
+    
+    context = {
+        'tickets': tickets_dict.values()
+    }
+    
+    return render(request, 'registro_pedidos.html', context)
+
+@login_required
+def marcar_pagado(request, registro_id):
+    """Marca un registro de pedido como pagado"""
+    if request.method == 'POST':
+        try:
+            registro = get_object_or_404(RegistroPedido, id=registro_id)
+            
+            if not request.user.is_staff and registro.usuario != request.user:
+                return JsonResponse({'status': 'error', 'message': 'Sin permisos'}, status=403)
+            
+            registro.pagado = True
+            registro.save()
+            
+            ticket_completo = not RegistroPedido.objects.filter(
+                ticket=registro.ticket, pagado=False
+            ).exists()
+            
+            if ticket_completo:
+                registro.ticket.completado = True
+                registro.ticket.save()
+            
+            return JsonResponse({
+                'status': 'ok',
+                'message': 'Registro marcado como pagado',
+                'ticket_completo': ticket_completo
+            })
+            
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    return JsonResponse({'status': 'error'}, status=400)
 
     items = [{
         'producto': item.producto.nombre,
