@@ -1,11 +1,38 @@
 {% extends 'LAYOUT.html'%}
 
+{% block title %} Login {% endblock %}
+
+{% block page_title %}Iniciar Sesión{% endblock %}
+
 {% block content %} 
 
-<form method="POST" action="{% url 'login' %}">
+<form method="POST" action="{% url 'login' %}" class="max-w-md mx-auto">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Iniciar sesión</button>
+    <div class="space-y-4">
+        {{ form.as_p }}
+    </div>
+    <button type="submit" class="w-full mt-6 py-3 px-4 bg-gradient-to-r from-blue-600 to-blue-800 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:transform hover:scale-105">Iniciar sesión</button>
 </form>
+
+<style>
+    form input {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #e0e0e0;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+    }
+    form input:focus {
+        outline: none;
+        border-color: #0077b6;
+        box-shadow: 0 0 0 3px rgba(0, 119, 182, 0.1);
+    }
+    form label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #333;
+    }
+</style>
 
 {% endblock %}
