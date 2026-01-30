@@ -3,7 +3,12 @@
 <html lang="es" class="h-full">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="description" content="Sistema de Punto de Venta para Marisquería La Sirenita">
+    <meta name="theme-color" content="#040d20">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <title>
         {% block title %}
@@ -107,6 +112,11 @@
                 min-height: 44px;
                 min-width: 44px;
             }
+            
+            /* Prevent accidental zoom on inputs while allowing intentional zoom */
+            input, textarea, select {
+                font-size: 16px;
+            }
         }
         
         /* Improve mobile menu button visibility */
@@ -115,6 +125,13 @@
             align-items: center;
             justify-content: center;
             padding: 0.5rem;
+        }
+        
+        /* Optimize for touch devices */
+        @media (hover: none) and (pointer: coarse) {
+            button, .boton, a {
+                -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+            }
         }
     </style>
 </head>
