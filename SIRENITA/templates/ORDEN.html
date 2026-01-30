@@ -38,7 +38,7 @@
         {% for producto in categoria.producto_set.all %}
           <li>
             {{ producto.nombre }} - ${{ producto.precio }}
-            <button onclick="agregarProducto({{ producto.id }}, '{{ producto.nombre }}')">Agregar</button>
+            <button onclick="agregarProducto({{ producto.id }}, '{{ producto.nombre }}', {{ producto.precio }})">Agregar</button>
           </li>
         {% endfor %}
       </ul>
@@ -79,7 +79,7 @@ function agregarProducto(id, nombre, precio) {
   productoSeleccionado = id;
   productoNombre = nombre;
   productoPrecio = precio;
-  document.getElementById('modal-producto-nombre').innerText = nombre;
+  document.getElementById('modal-producto-nombre').textContent = nombre;
   document.getElementById('observaciones').value = '';
   document.getElementById('modal').style.display = 'block';
   document.getElementById('modal-overlay').style.display = 'block';
@@ -125,6 +125,16 @@ function actualizarTicket() {
   ticketDiv.innerHTML = html;
   totalSpan.innerText = total.toFixed(2);
 }
+
+// Añadir soporte para cerrar modal con tecla Escape
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape') {
+    const modal = document.getElementById('modal');
+    if (modal && modal.style.display === 'block') {
+      cerrarModal();
+    }
+  }
+});
 </script>
 
 <style>

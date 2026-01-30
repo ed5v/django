@@ -100,10 +100,10 @@
         <div class="container mx-auto px-6 py-5">
             <div id="logotipo" class="flex items-center gap-6 text-white">
                 <!-- Logo a la izquierda -->
-                <img src="{% static 'css/logo.png' %}" alt="Logo" class="w-20 h-20 transition-transform hover:scale-110" />
+                <img src="{% static 'css/logo.png' %}" alt="Logo de Marisquería La Sirenita" class="w-20 h-20 transition-transform hover:scale-110" />
                 <div class="flex-1 text-center">
                     <h1 class="text-4xl font-bold tracking-wide" style="color: var(--color-gold);">BIENVENIDO</h1>
-                    <p class="text-sm text-gray-300 mt-1">MARISQUERIA LA SIRENITA</p>
+                    <p class="text-sm text-gray-300 mt-1">MARISQUERÍA LA SIRENITA</p>
                 </div>
             </div>
         </div>
@@ -141,7 +141,7 @@
 
     <!-- FOOTER -->
     <footer class="header-gradient text-white text-center py-6 shadow-inner mt-auto">
-        <p class="text-sm">LA SIRENITA &copy; {{ "now"|date:"Y" }}</p>
+        <p class="text-sm">LA SIRENITA &copy; {% now "Y" %}</p>
         <p class="text-xs text-gray-300 mt-1">Sistema de Punto de Venta</p>
     </footer>
 
