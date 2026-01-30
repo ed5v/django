@@ -156,7 +156,10 @@
     <nav class="nav-gradient shadow-xl sticky top-0 z-50">
         <div class="container mx-auto px-6">
             <!-- Hamburger Menu Button (Mobile) -->
-            <button id="mobile-menu-button" class="md:hidden text-white p-2 focus:outline-none">
+            <button id="mobile-menu-button" class="md:hidden text-white p-2 focus:outline-none" 
+                    aria-label="Menú de navegación" 
+                    aria-expanded="false" 
+                    aria-controls="mobile-menu">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                 </svg>
@@ -180,7 +183,7 @@
     </nav>
     
     <!-- Mobile Menu Dropdown -->
-    <div id="mobile-menu" class="hidden md:hidden nav-gradient shadow-lg">
+    <div id="mobile-menu" class="hidden md:hidden nav-gradient shadow-lg" role="navigation" aria-label="Menú de navegación móvil">
         <ul class="list-none">
         {% if user.is_authenticated %}
             <li><a href="/INICIO" class="block font-semibold px-6 py-3 border-b border-gray-700">INICIO</a></li>
@@ -221,9 +224,20 @@
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenu = document.getElementById('mobile-menu');
             
-            if (mobileMenuButton) {
+            if (mobileMenuButton && mobileMenu) {
                 mobileMenuButton.addEventListener('click', function() {
+                    const isExpanded = mobileMenu.classList.contains('hidden');
                     mobileMenu.classList.toggle('hidden');
+                    mobileMenuButton.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+                });
+                
+                // Close menu when a link is clicked
+                const menuLinks = mobileMenu.querySelectorAll('a');
+                menuLinks.forEach(function(link) {
+                    link.addEventListener('click', function() {
+                        mobileMenu.classList.add('hidden');
+                        mobileMenuButton.setAttribute('aria-expanded', 'false');
+                    });
                 });
             }
         });

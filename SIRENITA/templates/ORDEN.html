@@ -59,35 +59,50 @@
 </div>
 
 <!-- Modal para observaciones -->
-<div id="modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:#fff; padding:20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); border-radius:12px; z-index:1000; min-width:300px; max-width:90vw; width:400px;">
-  <h3 style="color:#023e8a; margin-bottom:15px; font-size:1.2rem;">Observaciones para <span id="modal-producto-nombre" style="color:#E0B344;"></span></h3>
+<div id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:#fff; padding:20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); border-radius:12px; z-index:1000; min-width:300px; max-width:90vw; width:400px;">
+  <h3 id="modal-title" style="color:#023e8a; margin-bottom:15px; font-size:1.2rem;">Observaciones para <span id="modal-producto-nombre" style="color:#E0B344;"></span></h3>
   <textarea id="observaciones" rows="4" style="width:100%; padding:10px; border:2px solid #e0e0e0; border-radius:6px; font-family:inherit; font-size:14px;" placeholder="Sin cebolla, bien cocido, etc."></textarea><br><br>
   <div style="display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;">
-    <button onclick="cerrarModal()" style="background:linear-gradient(135deg, #6c757d 0%, #495057 100%); flex:1; min-width:120px;">Cancelar</button>
-    <button onclick="enviarProducto()" style="background:linear-gradient(135deg, #28a745 0%, #20863a 100%); flex:1; min-width:120px;">Agregar al pedido</button>
+    <button onclick="cerrarModal()" style="background:linear-gradient(135deg, #6c757d 0%, #495057 100%); flex:1; min-width:120px; min-height:44px;">Cancelar</button>
+    <button onclick="enviarProducto()" style="background:linear-gradient(135deg, #28a745 0%, #20863a 100%); flex:1; min-width:120px; min-height:44px;">Agregar al pedido</button>
   </div>
 </div>
-<div id="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999;" onclick="cerrarModal()"></div>
+<div id="modal-overlay" role="button" tabindex="-1" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999;" onclick="cerrarModal()"></div>
 
 <script>
 let productoSeleccionado = null;
 let productoNombre = '';
 let productoPrecio = 0;
 let ticket = [];
+let lastFocusedElement = null;
 
 function agregarProducto(id, nombre, precio) {
   productoSeleccionado = id;
   productoNombre = nombre;
   productoPrecio = precio;
+  
+  // Store the element that triggered the modal
+  lastFocusedElement = document.activeElement;
+  
   document.getElementById('modal-producto-nombre').textContent = nombre;
   document.getElementById('observaciones').value = '';
   document.getElementById('modal').style.display = 'block';
   document.getElementById('modal-overlay').style.display = 'block';
+  
+  // Focus the textarea when modal opens
+  setTimeout(() => {
+    document.getElementById('observaciones').focus();
+  }, 100);
 }
 
 function cerrarModal() {
   document.getElementById('modal').style.display = 'none';
   document.getElementById('modal-overlay').style.display = 'none';
+  
+  // Return focus to the element that opened the modal
+  if (lastFocusedElement) {
+    lastFocusedElement.focus();
+  }
 }
 
 function enviarProducto() {
@@ -133,6 +148,19 @@ document.addEventListener('keydown', function(event) {
     if (modal && modal.style.display === 'block') {
       cerrarModal();
     }
+  }
+});
+
+// Allow Enter/Space on overlay to close modal
+document.addEventListener('DOMContentLoaded', function() {
+  const overlay = document.getElementById('modal-overlay');
+  if (overlay) {
+    overlay.addEventListener('keydown', function(event) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        cerrarModal();
+      }
+    });
   }
 });
 </script>
