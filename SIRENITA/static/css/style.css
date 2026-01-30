@@ -7,116 +7,29 @@
    
 }
 
-
+/* Legacy styles - most are now handled by Tailwind in LAYOUT.html */
 
 body{
-   
     background-color: rgb(255, 0, 0);
 }
 
-header{
-    width: 1212px;
-    height: 140px;
-    margin: auto;   
-    
-}
-
-#logotipo{
-    width: 100%;
-    height: 140px;
-    background-color: #040d20;
-    margin: auto;   
-    padding top: 10px;
-    
-}
-
-#logotipo img{
-    display: block;
-    float: left;
-    width: 80px;
-    margin-top: 20px;
-    
-}
-
-#logotipo h1{
-    display: block;
-    float: left;
-    margin-top: 40px;
-    margin-left: 300px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    font-weight: normal;
-    color: #E0B344;
-}
-
-/*menú*/
-nav{
-    width: 1250px;
-    height: 40px;
-    margin: 0 auto;
-    background-color: #1b1e1f;
-    border: 1px solid #333;
-    box-shadow: 0px 22px 22px #gray;
-    font-size: 15px;
-    margin-bottom:45px;
-}
-
-nav ul{
-    list-style: none;
-    text-decoration: none;
-    
-}
-
-nav ul li{
-
-    line-height: 40px;
-    float: left;
-    
-}
-
-nav ul li a{
-    display: block;
-    padding-left: 15px ;
-    padding-right: 15px;
-    color: #d1d4d6;
-
-        
-}
-
-nav ul li a:hover{
-    background-color: #E0B344;
-    box-shadow: 0px 0px 5px #33333 inset;
-    color: #fff;
-    text-decoration: none;
-    transition: 0.5s;
-}
-
-/*CONTENIDO*/
-#content{
-    width: 1212px;
-    min-height: 930px;
-    margin: 0 auto;
-    margin-bottom: 30px;
-    margin-top: 30px;
-    
-}
-
-.box{
-    background: white;
-    width: 90%;
-    min-height: 930px;
-    padding: 20px;
-    border: 1px solid #ddd;
-}
+/* These styles are kept for backwards compatibility with any pages not using LAYOUT.html */
 
 .boton {
     background-color: #4CAF50;
     border: none;
     padding: 10px 20px;
-    font.size: 16px;
+    font-size: 16px;
     cursor: pointer;
-    display:flex;
+    display: flex;
     align-items: center;
+    min-height: 44px;
+    transition: all 0.3s ease;
+}
+
+.boton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .boton img{
