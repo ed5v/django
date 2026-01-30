@@ -1,8 +1,9 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="h-full">
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>
         {% block title %}
@@ -16,44 +17,122 @@
 
     <!-- Ajustes específicos -->
     <style>
+        /* Color palette preservation */
+        :root {
+            --color-dark-blue: #040d20;
+            --color-navy: #1b1e1f;
+            --color-gold: #E0B344;
+            --color-blue-primary: #0077b6;
+            --color-blue-dark: #023e8a;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #content {
+            flex: 1;
+        }
+
         nav ul li a {
-            @apply text-white hover:bg-blue-700 transition;
+            display: block;
+            padding: 0.75rem 1.25rem;
+            color: white;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        nav ul li a:hover {
+            background: linear-gradient(135deg, var(--color-gold) 0%, #d4a43f 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-gradient {
+            background: linear-gradient(135deg, var(--color-dark-blue) 0%, #0a1e42 100%);
+        }
+
+        .nav-gradient {
+            background: linear-gradient(135deg, var(--color-navy) 0%, #2c3639 100%);
+        }
+
+        .box {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .box:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .title {
+            text-align: center;
+            background: linear-gradient(135deg, var(--color-blue-primary) 0%, var(--color-blue-dark) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Modern button styling */
+        button, .boton {
+            transition: all 0.3s ease;
+        }
+
+        button:hover, .boton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
         }
     </style>
 </head>
 
-<body class="bg-gray-100 text-white">
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 text-gray-800">
 
     <!-- HEADER -->
-    <header class="bg-blue-800 py-4 shadow">
-        <div id="logotipo" class="flex items-center gap-4 justify-center text-white">
-            <img src="{% static 'css/logo.png' %}" alt="Logo" class="w-24 h-24" />
-            <h1 class="text-3xl font-bold tracking-wide">BIENVENIDO</h1>
+    <header class="header-gradient shadow-lg">
+        <div class="container mx-auto px-6 py-5">
+            <div id="logotipo" class="flex items-center gap-6 text-white">
+                <!-- Logo a la izquierda -->
+                <img src="{% static 'css/logo.png' %}" alt="Logo de Marisquería La Sirenita" class="w-20 h-20 transition-transform hover:scale-110" />
+                <div class="flex-1 text-center">
+                    <h1 class="text-4xl font-bold tracking-wide" style="color: var(--color-gold);">BIENVENIDO</h1>
+                    <p class="text-sm text-gray-300 mt-1">MARISQUERÍA LA SIRENITA</p>
+                </div>
+            </div>
         </div>
     </header>
 
     <!-- NAV -->
-    <nav class="bg-blue-900 shadow-md">
-{% if user.is_authenticated %}
-            <li><a href="/INICIO">INICIO</a></li>
-            <li><a href="/ORDEN">ORDEN</a></li>
-            <li><a href="/CUENTA">CUENTA</a></li>
-            <li><a href="/INVENTARIO">INVENTARIO</a></li>
-            <li><a href="/AUDITORIA">AUDITORIA</a></li>
-            <li><a href="/CAJA">CAJA</a></li>
-            <li><a href="/logout">CERRAR SESIÓN</a></li>
+    <nav class="nav-gradient shadow-xl sticky top-0 z-50">
+        <ul class="container mx-auto px-6 flex flex-wrap justify-center items-center list-none">
+        {% if user.is_authenticated %}
+            <li><a href="/INICIO" class="font-semibold">INICIO</a></li>
+            <li><a href="/ORDEN" class="font-semibold">ORDEN</a></li>
+            <li><a href="/CUENTA" class="font-semibold">CUENTA</a></li>
+            <li><a href="/INVENTARIO" class="font-semibold">INVENTARIO</a></li>
+            <li><a href="/AUDITORIA" class="font-semibold">AUDITORIA</a></li>
+            <li><a href="/CAJA" class="font-semibold">CAJA</a></li>
+            <li><a href="/logout" class="font-semibold">CERRAR SESIÓN</a></li>
         {% else %}
-            <li><a href="/login">INICIAR SESIÓN</a></li>
+            <li><a href="/login" class="font-semibold">INICIAR SESIÓN</a></li>
         {% endif %}
-    </ul>
+        </ul>
     </nav>
 
     <!-- CONTENIDO -->
-    <div id="content" class="max-w-5xl mx-auto mt-8 p-6">
-
+    <div id="content" class="container mx-auto px-6 py-8">
         <!-- Caja con fondo blanco → texto negro -->
-        <div class="box bg-white p-6 shadow rounded-lg text-black border border-gray-300">
-            <h2 class="title text-2xl font-bold mb-4"></h2>
+        <div class="box bg-white p-8 text-black">
+            <h2 class="title text-3xl font-bold mb-6">
+                {% block page_title %}{% endblock %}
+            </h2>
 
             {% block content %}
             {% endblock %}
@@ -61,8 +140,9 @@
     </div>
 
     <!-- FOOTER -->
-    <footer class="bg-blue-800 text-white text-center py-4 mt-10 shadow-inner">
-        LA SIRENITA &copy;
+    <footer class="header-gradient text-white text-center py-6 shadow-inner mt-auto">
+        <p class="text-sm">LA SIRENITA &copy; {% now "Y" %}</p>
+        <p class="text-xs text-gray-300 mt-1">Sistema de Punto de Venta</p>
     </footer>
 
 </body>
