@@ -1,6 +1,6 @@
 import re
 import json
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.utils.timezone import datetime
 from django.http import HttpResponse, JsonResponse
@@ -200,29 +200,75 @@ def INICIO (request):
 def INVENTARIO (request):
     return render(request,'INVENTARIO.html')   
 
-def ORDEN (request):
-    categorias=Categoria.objects.prefetch_related('producto_set')
-    return render(request,'ORDEN.html',{'categorias':categorias})   
+@login_required
+def crear_ticket(request):
+    pedido = Pedido.objects.create(usuario=request.user)
+    pedido.numero_cliente = pedido.id
+    pedido.save()
+    return redirect(f'/ORDEN/?ticket_id={pedido.id}')
+
+@login_required
+def ORDEN(request):
+    ticket_id = request.GET.get('ticket_id')
+    ticket_actual = None
+    
+    if ticket_id:
+        qs = Pedido.objects.filter(id=ticket_id)
+        if not request.user.is_staff:
+            qs = qs.filter(usuario=request.user)
+        ticket_actual = qs.first()
+
+    if request.user.is_staff:
+        tickets_abiertos = Pedido.objects.filter(completado=False).order_by('-creado')
+    else:
+        tickets_abiertos = Pedido.objects.filter(usuario=request.user, completado=False).order_by('-creado')
+
+    categorias = Categoria.objects.prefetch_related('productos')
+    return render(request, 'ORDEN.html', {
+        'categorias': categorias,
+        'ticket_actual': ticket_actual,
+        'tickets_abiertos': tickets_abiertos
+    })
 
 def menu_view(request):
-    categorias = Categoria.objects.prefetch_related('producto_set')
+    categorias = Categoria.objects.prefetch_related('productos')
     return render(request, 'menu.html', {'categorias': categorias})
 
+@login_required
 def agregar_item(request):
     if request.method == 'POST':
-        data = json.loads(request.body)
-        pedido, _ = Pedido.objects.get_or_create(numero_cliente=data['numero_cliente'])
-        producto = Producto.objects.get(id=data['producto_id'])
-        item = ItemPedido.objects.create(
-            pedido=pedido,
-            producto=producto,
-            observaciones=data.get('observaciones', ''),
-            cantidad=data.get('cantidad', 1)
-        )
-        return JsonResponse({'status': 'ok'})
+        try:
+            data = json.loads(request.body)
+            ticket_id = data.get('ticket_id')
+            
+            qs = Pedido.objects.filter(id=ticket_id)
+            if not request.user.is_staff:
+                qs = qs.filter(usuario=request.user)
+            
+            pedido = qs.first()
+            if not pedido:
+                return JsonResponse({'status': 'error', 'message': 'Ticket no encontrado'}, status=404)
 
+            producto = get_object_or_404(Producto, id=data['producto_id'])
+            
+            ItemPedido.objects.create(
+                pedido=pedido,
+                producto=producto,
+                observaciones=data.get('observaciones', ''),
+                cantidad=data.get('cantidad', 1)
+            )
+            return JsonResponse({'status': 'ok'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    return JsonResponse({'status': 'error'}, status=400)
+
+@login_required
 def obtener_ticket(request, numero_cliente):
-    pedido = Pedido.objects.filter(numero_cliente=numero_cliente).last()
+    qs = Pedido.objects.filter(id=numero_cliente)
+    if not request.user.is_staff:
+        qs = qs.filter(usuario=request.user)
+
+    pedido = qs.first()
     if not pedido:
         return JsonResponse({'items': []})
 

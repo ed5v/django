@@ -5,14 +5,121 @@
 
 {% block title %} ORDEN {% endblock %}
 
-{% block page_title %} SELECCIONE UN PRODUCTO Y MODIFIQUE A GUSTO DEL CLIENTE {% endblock %}
+
+{% block page_title %} 
+    {% if ticket_actual %}
+        ORDEN #{{ ticket_actual.id }} - Usuario: {{ ticket_actual.usuario.username|default:"Sistema" }}
+    {% else %}
+        GESTIÓN DE ÓRDENES
+    {% endif %}
+{% endblock %}
 
 {% block content %}
+
+{% if not ticket_actual %}
+<div class="container" style="display:block;">
+    <div style="text-align:center; margin: 40px 0;">
+        <h2 style="font-size: 2rem; color: #023e8a; margin-bottom: 30px;">Gestión de Tickets</h2>
+        <a href="{% url 'crear_ticket' %}" class="btn-new-ticket">
+            <span style="font-size: 1.5rem; margin-right: 10px;">+</span> ABRIR NUEVO TICKET
+        </a>
+    </div>
+
+    <div class="tickets-list-section">
+        <h3 style="border-bottom: 2px solid #28a745; color: #28a745;">Tickets Abiertos</h3>
+        {% if tickets_abiertos %}
+            <ul class="ticket-list">
+                {% for t in tickets_abiertos %}
+                <li>
+                    <a href="{% url 'ORDEN' %}?ticket_id={{ t.id }}" class="ticket-link">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-weight:bold; font-size:1.1rem; color:#023e8a;">Ticket #{{ t.id }}</span>
+                            <span style="font-weight:bold; color:#28a745;">${{ t.total }}</span>
+                        </div>
+                        <div class="ticket-info">
+                            <span style="margin-right:15px;">📅 {{ t.creado|date:"d/m/Y H:i" }}</span>
+                            <span>👤 {{ t.usuario.username|default:"Sistema" }}</span>
+                        </div>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div style="text-align:center; padding: 40px; color:#888; background:#f9f9f9; border-radius:8px;">
+                <p>No hay tickets pendientes actualmente.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .btn-new-ticket {
+        display: inline-flex;
+        align-items: center;
+        padding: 18px 36px;
+        background: linear-gradient(135deg, #28a745 0%, #20863a 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 50px;
+        font-weight: bold;
+        font-size: 1.2rem;
+        box-shadow: 0 6px 15px rgba(40, 167, 69, 0.4);
+        transition: all 0.3s ease;
+    }
+    .btn-new-ticket:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(40, 167, 69, 0.5);
+    }
+    .tickets-list-section {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        border: 1px solid #f0f0f0;
+    }
+    .ticket-list {
+        list-style: none;
+        padding: 0;
+        margin-top: 20px;
+    }
+    .ticket-list li {
+        margin-bottom: 12px;
+    }
+    .ticket-link {
+        display: block;
+        padding: 20px;
+        text-decoration: none;
+        color: #333;
+        transition: all 0.2s;
+        border-radius: 12px;
+        border: 1px solid #eee;
+        background: #fff;
+    }
+    .ticket-link:hover {
+        background-color: #f0f7ff;
+        border-color: #0077b6;
+        transform: translateX(5px);
+    }
+    .ticket-info {
+        display: flex;
+        flex-wrap: wrap;
+        color: #666;
+        font-size: 0.9rem;
+        margin-top: 8px;
+    }
+</style>
+
+{% else %}
 
 <div class="container">
   <!-- Sección izquierda: Menú -->
   <div class="menu-section">
-    <h2>Menú</h2>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+        <h2 style="margin-bottom:0;">Menú</h2>
+        <a href="{% url 'ORDEN' %}" style="font-size:0.9rem; color:#666; text-decoration:none; padding:5px 10px; border:1px solid #ccc; border-radius:4px;">⬅ Volver</a>
+    </div>
 
      <!-- Categoría Entradas -->
     <h3>Entradas</h3>
@@ -35,7 +142,7 @@
     {% for categoria in categorias %}
       <h3>{{ categoria.nombre }}</h3>
       <ul>
-        {% for producto in categoria.producto_set.all %}
+        {% for producto in categoria.productos.all %}
           <li>
             {{ producto.nombre }} - ${{ producto.precio }}
             <button onclick="agregarProducto({{ producto.id }}, '{{ producto.nombre }}', {{ producto.precio }})">Agregar</button>
@@ -49,7 +156,10 @@
 
   <!-- Sección derecha: Ticket del cliente -->
   <div class="ticket-section">
-    <h2>Ticket Cliente #<span id="cliente-id">123</span></h2>
+    <h2>Ticket #<span id="cliente-id">{{ ticket_actual.id }}</span></h2>
+    <div id="ticket-info-extra" style="font-size:0.85rem; color:#666; margin-bottom:10px;">
+        Usuario: {{ ticket_actual.usuario.username|default:"Sistema" }} | {{ ticket_actual.creado|date:"d/m H:i" }}
+    </div>
     <div id="ticket-contenido">
       <!-- Ticket dinámico se genera aquí -->
     </div>
@@ -70,18 +180,31 @@
 <div id="modal-overlay" role="button" tabindex="-1" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999;" onclick="cerrarModal()"></div>
 
 <script>
+const TICKET_ID = {{ ticket_actual.id }};
 let productoSeleccionado = null;
 let productoNombre = '';
 let productoPrecio = 0;
-let ticket = [];
+let ticket = [
+    {% for item in ticket_actual.items.all %}
+    {
+        producto: "{{ item.producto.nombre }}",
+        precio: {{ item.producto.precio }},
+        cantidad: {{ item.cantidad }},
+        observaciones: "{{ item.observaciones|escapejs }}"
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+];
 let lastFocusedElement = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    actualizarTicket();
+});
 
 function agregarProducto(id, nombre, precio) {
   productoSeleccionado = id;
   productoNombre = nombre;
   productoPrecio = precio;
   
-  // Store the element that triggered the modal
   lastFocusedElement = document.activeElement;
   
   document.getElementById('modal-producto-nombre').textContent = nombre;
@@ -89,7 +212,6 @@ function agregarProducto(id, nombre, precio) {
   document.getElementById('modal').style.display = 'block';
   document.getElementById('modal-overlay').style.display = 'block';
   
-  // Focus the textarea when modal opens
   setTimeout(() => {
     document.getElementById('observaciones').focus();
   }, 100);
@@ -99,7 +221,6 @@ function cerrarModal() {
   document.getElementById('modal').style.display = 'none';
   document.getElementById('modal-overlay').style.display = 'none';
   
-  // Return focus to the element that opened the modal
   if (lastFocusedElement) {
     lastFocusedElement.focus();
   }
@@ -108,16 +229,38 @@ function cerrarModal() {
 function enviarProducto() {
   const observaciones = document.getElementById('observaciones').value;
 
-  // Añade producto localmente (sin backend)
-  ticket.push({
-    producto: productoNombre,
-    precio: productoPrecio,
-    observaciones: observaciones || null,
-    cantidad: 1
+  fetch('{% url "agregar_item" %}', {
+      method: "POST",
+      headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token }}"
+      },
+      body: JSON.stringify({
+          ticket_id: TICKET_ID,
+          producto_id: productoSeleccionado,
+          observaciones: observaciones,
+          cantidad: 1
+      })
+  })
+  .then(response => response.json())
+  .then(data => {
+      if(data.status === 'ok') {
+          ticket.push({
+            producto: productoNombre,
+            precio: productoPrecio,
+            observaciones: observaciones || null,
+            cantidad: 1
+          });
+          actualizarTicket();
+          cerrarModal();
+      } else {
+          alert("Error al guardar: " + (data.message || 'Error desconocido'));
+      }
+  })
+  .catch(error => {
+      console.error('Error:', error);
+      alert("Error de conexión al guardar el producto.");
   });
-
-  cerrarModal();
-  actualizarTicket();
 }
 
 function actualizarTicket() {
@@ -141,7 +284,6 @@ function actualizarTicket() {
   totalSpan.innerText = total.toFixed(2);
 }
 
-// Añadir soporte para cerrar modal con tecla Escape
 document.addEventListener('keydown', function(event) {
   if (event.key === 'Escape') {
     const modal = document.getElementById('modal');
@@ -151,7 +293,6 @@ document.addEventListener('keydown', function(event) {
   }
 });
 
-// Allow Enter/Space on overlay to close modal
 document.addEventListener('DOMContentLoaded', function() {
   const overlay = document.getElementById('modal-overlay');
   if (overlay) {
@@ -268,4 +409,6 @@ ul li {
   }
 }
 </style>
+{% endif %}
+
 {% endblock %}

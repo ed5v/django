@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 # ===========================================
@@ -28,7 +29,8 @@ class Producto(models.Model):
 #                 PEDIDOS
 # ===========================================
 class Pedido(models.Model):
-    numero_cliente = models.IntegerField()
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    numero_cliente = models.IntegerField(null=True, blank=True)
     creado = models.DateTimeField(auto_now_add=True)
     completado = models.BooleanField(default=False)
 
@@ -43,7 +45,7 @@ class ItemPedido(models.Model):
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE, related_name="items")
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     cantidad = models.PositiveIntegerField(default=1)
-    observaciones = models.TextField(blank=True)
+    observaciones = models.TextField(blank=True, null=True)
 
     def subtotal(self):
         return self.cantidad * self.producto.precio
