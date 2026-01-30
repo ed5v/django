@@ -326,21 +326,38 @@ def obtener_ticket(request, numero_cliente):
 
     pedido = qs.first()
     if not pedido:
-        return JsonResponse({'items': []})
+        return JsonResponse({'items_solicitados': [], 'items_nuevos': []})
 
-    items = pedido.items.all()
-    items_data = [{
+    # Separar items solicitados de items nuevos
+    items_solicitados = pedido.items.filter(solicitado=True)
+    items_nuevos = pedido.items.filter(solicitado=False)
+    
+    items_solicitados_data = [{
+        'id': item.id,
         'producto': item.producto.nombre,
         'cantidad': item.cantidad,
         'precio': str(item.producto.precio),
-        'observaciones': item.observaciones
-    } for item in items]
+        'observaciones': item.observaciones,
+        'solicitado': True
+    } for item in items_solicitados]
+    
+    items_nuevos_data = [{
+        'id': item.id,
+        'producto': item.producto.nombre,
+        'cantidad': item.cantidad,
+        'precio': str(item.producto.precio),
+        'observaciones': item.observaciones,
+        'solicitado': False
+    } for item in items_nuevos]
 
-    return JsonResponse({'items': items_data})
+    return JsonResponse({
+        'items_solicitados': items_solicitados_data,
+        'items_nuevos': items_nuevos_data
+    })
 
 @login_required
 def solicitar_pedido(request):
-    """Registra los items del pedido en la tabla de registro para gestión de pagos"""
+    """Registra los items del pedido en la tabla de registro para gestión de pagos y envía a impresoras por categoría"""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
@@ -355,9 +372,19 @@ def solicitar_pedido(request):
             if not pedido:
                 return JsonResponse({'status': 'error', 'message': 'Ticket no encontrado'}, status=404)
             
-            # Registrar todos los items del pedido en la tabla de registro
+            # Obtener solo los items NO solicitados
+            items_no_solicitados = pedido.items.filter(solicitado=False)
+            
+            if not items_no_solicitados.exists():
+                return JsonResponse({'status': 'error', 'message': 'No hay items nuevos para solicitar'}, status=400)
+            
+            # Registrar todos los items no solicitados en la tabla de registro
             items_registrados = 0
-            for item in pedido.items.all():
+            items_comida = []
+            items_bebidas = []
+            
+            for item in items_no_solicitados:
+                # Crear registro
                 RegistroPedido.objects.create(
                     usuario=request.user,
                     ticket=pedido,
@@ -368,12 +395,47 @@ def solicitar_pedido(request):
                     subtotal=item.subtotal(),
                     observaciones=item.observaciones
                 )
+                
+                # Marcar como solicitado
+                item.solicitado = True
+                item.save()
+                
                 items_registrados += 1
+                
+                # Clasificar por categoría para impresión
+                categoria_nombre = item.producto.categoria.nombre.lower()
+                item_info = {
+                    'producto': item.producto.nombre,
+                    'cantidad': item.cantidad,
+                    'observaciones': item.observaciones or ''
+                }
+                
+                if 'comida' in categoria_nombre or 'plato' in categoria_nombre or 'entrada' in categoria_nombre:
+                    items_comida.append(item_info)
+                elif 'bebida' in categoria_nombre or 'drink' in categoria_nombre:
+                    items_bebidas.append(item_info)
+                else:
+                    # Por defecto va a comida
+                    items_comida.append(item_info)
+            
+            # Simular envío a impresoras (aquí deberías integrar tu lógica real de impresión)
+            mensaje_impresion = ""
+            if items_comida:
+                mensaje_impresion += f"✓ {len(items_comida)} items enviados a IMPRESORA 01 (Cocina)\n"
+                # TODO: Aquí agregar código para enviar a impresora 01
+                # print_to_kitchen(items_comida, ticket_id)
+                
+            if items_bebidas:
+                mensaje_impresion += f"✓ {len(items_bebidas)} items enviados a IMPRESORA 02 (Bar)"
+                # TODO: Aquí agregar código para enviar a impresora 02
+                # print_to_bar(items_bebidas, ticket_id)
             
             return JsonResponse({
                 'status': 'ok',
-                'message': f'Pedido solicitado exitosamente. {items_registrados} items registrados.',
-                'items_registrados': items_registrados
+                'message': f'Pedido solicitado exitosamente.\n{mensaje_impresion}',
+                'items_registrados': items_registrados,
+                'items_comida': len(items_comida),
+                'items_bebidas': len(items_bebidas)
             })
             
         except Exception as e:

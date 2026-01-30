@@ -46,6 +46,7 @@ class ItemPedido(models.Model):
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     cantidad = models.PositiveIntegerField(default=1)
     observaciones = models.TextField(blank=True, null=True)
+    solicitado = models.BooleanField(default=False)  # True cuando se envía a cocina/bar
 
     def subtotal(self):
         return self.cantidad * self.producto.precio
