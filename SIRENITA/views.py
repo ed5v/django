@@ -9,8 +9,9 @@ from django.contrib import messages  # Para usar mensajes flash
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Count, Q, F, DecimalField
 from django.db.models.functions import TruncDate
-from .models import Categoria, Producto, Pedido, ItemPedido, RegistroPedido
+from .models import Categoria, Producto, Pedido, ItemPedido, RegistroPedido, Cupon
 from .models import Receta, Ingrediente, PasoPreparacion, Foto, Nutricional
+from .payment_service import PaymentService
 from .forms import (
     RecetaForm,
     IngredientesFormSet,
@@ -188,8 +189,40 @@ def CAJA (request):
 
 @login_required
 @admin_required
-def CUENTA (request):
-    return render(request,'CUENTA.html')
+def CUENTA(request):
+    """Vista de cuentas pendientes - todos los tickets pendientes de pago con items solicitados"""
+    # Obtener todos los tickets que tienen items solicitados y están pendientes de pago
+    tickets_pendientes = Pedido.objects.filter(
+        estado_pago='PENDIENTE_DE_PAGO',
+        items__solicitado=True
+    ).distinct().select_related('usuario', 'cupon_aplicado').prefetch_related('items__producto__categoria').order_by('-creado')
+    
+    # Calcular información de cada ticket
+    tickets_info = []
+    for ticket in tickets_pendientes:
+        total_original = ticket.total()
+        total_final = ticket.total_con_descuento()
+        
+        # Obtener items solicitados con estado de pago individual
+        items_solicitados = []
+        for item in ticket.items.filter(solicitado=True):
+            items_solicitados.append({
+                'item': item,
+                'pagado': hasattr(item, 'pagado_individual') and item.pagado_individual,
+            })
+        
+        tickets_info.append({
+            'ticket': ticket,
+            'total_original': total_original,
+            'total_final': total_final,
+            'tiene_cupon': ticket.cupon_aplicado is not None,
+            'cupon': ticket.cupon_aplicado,
+            'items_solicitados': items_solicitados,
+        })
+    
+    return render(request, 'CUENTA.html', {
+        'tickets_pendientes': tickets_info
+    })
 
 def INDEX (request):
     return render(request,'index.html')  
@@ -240,6 +273,11 @@ def SEGUIMIENTO(request):
     hoy = timezone.now().date()
     pedidos_hoy = Pedido.objects.filter(completado=True, creado__date=hoy).count()
     
+    # Tickets pagados recientes (últimos 50)
+    tickets_pagados = Pedido.objects.filter(
+        estado_pago='PAGADO'
+    ).select_related('usuario', 'cupon_aplicado').prefetch_related('items__producto').order_by('-fecha_pago')[:50]
+    
     context = {
         'total_ventas': total_ventas,
         'ventas_por_usuario': ventas_por_usuario,
@@ -247,6 +285,7 @@ def SEGUIMIENTO(request):
         'historial_ventas': historial_ventas,
         'pedidos_pendientes': pedidos_pendientes,
         'pedidos_hoy': pedidos_hoy,
+        'tickets_pagados': tickets_pagados,
     }
     
     return render(request, 'SEGUIMIENTO.html', context)
@@ -635,6 +674,314 @@ def crear_receta(request):
         "fotos_formset": fotos_formset,
         "nutricion_formset": nutricion_formset,
     })
+
+
+# ===========================================
+#       GESTIÓN DE PAGOS Y CUPONES
+# ===========================================
+
+@login_required
+@admin_required
+def validar_cupon(request):
+    """Valida un cupón sin aplicarlo"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            codigo = data.get('codigo', '').strip().upper()
+            ticket_id = data.get('ticket_id')
+            
+            if not codigo:
+                return JsonResponse({'valid': False, 'mensaje': 'Código vacío'})
+            
+            # Buscar cupón
+            try:
+                cupon = Cupon.objects.get(codigo=codigo)
+            except Cupon.DoesNotExist:
+                return JsonResponse({'valid': False, 'mensaje': 'Cupón no existe'})
+            
+            # Validar disponibilidad
+            puede_usar, mensaje = cupon.puede_usarse()
+            if not puede_usar:
+                return JsonResponse({'valid': False, 'mensaje': mensaje})
+            
+            # Calcular descuento
+            ticket = Pedido.objects.get(id=ticket_id)
+            total_original = ticket.total()
+            descuento = cupon.calcular_descuento(total_original)
+            total_final = total_original - descuento
+            
+            return JsonResponse({
+                'valid': True,
+                'mensaje': 'Cupón válido',
+                'cupon': {
+                    'codigo': cupon.codigo,
+                    'tipo': cupon.tipo_descuento,
+                    'valor': str(cupon.valor),
+                    'descuento': str(descuento),
+                    'total_final': str(total_final)
+                }
+            })
+            
+        except Exception as e:
+            return JsonResponse({'valid': False, 'mensaje': f'Error: {str(e)}'})
+    
+    return JsonResponse({'valid': False, 'mensaje': 'Método no permitido'})
+
+
+@login_required
+@admin_required
+def aplicar_cupon(request):
+    """Aplica un cupón a un ticket"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            codigo = data.get('codigo', '').strip().upper()
+            ticket_id = data.get('ticket_id')
+            
+            # Obtener ticket y cupón
+            ticket = Pedido.objects.get(id=ticket_id)
+            cupon = Cupon.objects.get(codigo=codigo)
+            
+            # Validar cupón
+            puede_usar, mensaje = cupon.puede_usarse()
+            if not puede_usar:
+                return JsonResponse({'success': False, 'mensaje': mensaje})
+            
+            # Calcular descuento
+            total_original = ticket.total()
+            descuento = cupon.calcular_descuento(total_original)
+            
+            # Aplicar cupón
+            ticket.cupon_aplicado = cupon
+            ticket.descuento_aplicado = descuento
+            ticket.save()
+            
+            # Incrementar usos del cupón
+            cupon.usos_actuales += 1
+            cupon.save()
+            
+            return JsonResponse({
+                'success': True,
+                'mensaje': 'Cupón aplicado correctamente',
+                'descuento': str(descuento),
+                'total_final': str(total_original - descuento),
+                'cupon': {
+                    'codigo': cupon.codigo,
+                    'tipo': cupon.tipo_descuento,
+                    'valor': str(cupon.valor)
+                }
+            })
+            
+        except Pedido.DoesNotExist:
+            return JsonResponse({'success': False, 'mensaje': 'Ticket no encontrado'})
+        except Cupon.DoesNotExist:
+            return JsonResponse({'success': False, 'mensaje': 'Cupón no encontrado'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'mensaje': f'Error: {str(e)}'})
+    
+    return JsonResponse({'success': False, 'mensaje': 'Método no permitido'})
+
+
+@login_required
+@admin_required
+def remover_cupon(request):
+    """Remueve un cupón aplicado a un ticket"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            ticket_id = data.get('ticket_id')
+            
+            ticket = Pedido.objects.get(id=ticket_id)
+            
+            if ticket.cupon_aplicado:
+                # Decrementar usos del cupón
+                cupon = ticket.cupon_aplicado
+                if cupon.usos_actuales > 0:
+                    cupon.usos_actuales -= 1
+                    cupon.save()
+                
+                # Remover cupón del ticket
+                ticket.cupon_aplicado = None
+                ticket.descuento_aplicado = 0
+                ticket.save()
+                
+                return JsonResponse({
+                    'success': True,
+                    'mensaje': 'Cupón removido',
+                    'total_final': str(ticket.total())
+                })
+            else:
+                return JsonResponse({'success': False, 'mensaje': 'No hay cupón aplicado'})
+                
+        except Exception as e:
+            return JsonResponse({'success': False, 'mensaje': f'Error: {str(e)}'})
+    
+    return JsonResponse({'success': False, 'mensaje': 'Método no permitido'})
+
+
+@login_required
+@admin_required
+def pagar_ticket(request):
+    """Procesa el pago completo de un ticket"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            ticket_id = data.get('ticket_id')
+            metodo_pago = data.get('metodo_pago', 'EFECTIVO')
+            
+            ticket = Pedido.objects.get(id=ticket_id)
+            
+            # Verificar que esté pendiente
+            if ticket.estado_pago != 'PENDIENTE_DE_PAGO':
+                return JsonResponse({'success': False, 'mensaje': 'Ticket ya fue pagado'})
+            
+            # Calcular monto final
+            monto = ticket.total_con_descuento()
+            
+            # Procesar pago con el servicio de pagos
+            payment_service = PaymentService()
+            resultado = payment_service.process_payment(
+                ticket_id=ticket.id,
+                amount=monto,
+                method=metodo_pago
+            )
+            
+            if resultado.success:
+                # Actualizar ticket
+                from django.utils import timezone
+                ticket.estado_pago = 'PAGADO'
+                ticket.fecha_pago = timezone.now()
+                ticket.metodo_pago = metodo_pago
+                ticket.completado = True
+                ticket.save()
+                
+                # Crear registro de pago para cada item solicitado
+                for item in ticket.items.filter(solicitado=True):
+                    RegistroPedido.objects.create(
+                        usuario=ticket.usuario,
+                        ticket=ticket,
+                        producto=item.producto,
+                        categoria=item.producto.categoria,
+                        cantidad=item.cantidad,
+                        precio_unitario=item.producto.precio,
+                        subtotal=item.subtotal(),
+                        observaciones=item.observaciones,
+                        pagado=True
+                    )
+                
+                return JsonResponse({
+                    'success': True,
+                    'mensaje': 'Pago procesado correctamente',
+                    'transaction_id': resultado.transaction_id,
+                    'ticket_id': ticket.id
+                })
+            else:
+                return JsonResponse({
+                    'success': False,
+                    'mensaje': resultado.error or 'Error al procesar el pago'
+                })
+                
+        except Pedido.DoesNotExist:
+            return JsonResponse({'success': False, 'mensaje': 'Ticket no encontrado'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'mensaje': f'Error: {str(e)}'})
+    
+    return JsonResponse({'success': False, 'mensaje': 'Método no permitido'})
+
+
+@login_required
+@admin_required
+def pagar_item_individual(request):
+    """Procesa el pago de un item individual de un ticket"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            item_id = data.get('item_id')
+            metodo_pago = data.get('metodo_pago', 'EFECTIVO')
+            
+            item = ItemPedido.objects.select_related('pedido', 'producto').get(id=item_id)
+            ticket = item.pedido
+            
+            # Verificar que el ticket esté pendiente
+            if ticket.estado_pago == 'PAGADO':
+                return JsonResponse({'success': False, 'mensaje': 'El ticket completo ya fue pagado'})
+            
+            # Verificar que el item esté solicitado
+            if not item.solicitado:
+                return JsonResponse({'success': False, 'mensaje': 'Item no ha sido solicitado'})
+            
+            # Verificar si ya existe registro de pago para este item
+            registro_existente = RegistroPedido.objects.filter(
+                ticket=ticket,
+                producto=item.producto,
+                cantidad=item.cantidad,
+                pagado=True
+            ).first()
+            
+            if registro_existente:
+                return JsonResponse({'success': False, 'mensaje': 'Este item ya ha sido pagado'})
+            
+            # Calcular monto del item
+            monto = item.subtotal()
+            
+            # Procesar pago
+            payment_service = PaymentService()
+            resultado = payment_service.process_payment(
+                ticket_id=ticket.id,
+                amount=monto,
+                method=metodo_pago
+            )
+            
+            if resultado.success:
+                # Crear registro de pago individual
+                from django.utils import timezone
+                RegistroPedido.objects.create(
+                    usuario=ticket.usuario,
+                    ticket=ticket,
+                    producto=item.producto,
+                    categoria=item.producto.categoria,
+                    cantidad=item.cantidad,
+                    precio_unitario=item.producto.precio,
+                    subtotal=monto,
+                    observaciones=item.observaciones,
+                    pagado=True,
+                    fecha=timezone.now()
+                )
+                
+                # Verificar si todos los items del ticket están pagados
+                items_solicitados = ticket.items.filter(solicitado=True)
+                items_pagados = RegistroPedido.objects.filter(
+                    ticket=ticket,
+                    pagado=True
+                ).count()
+                
+                # Si todos los items están pagados, marcar ticket como pagado
+                if items_pagados >= items_solicitados.count():
+                    ticket.estado_pago = 'PAGADO'
+                    ticket.fecha_pago = timezone.now()
+                    ticket.metodo_pago = metodo_pago
+                    ticket.completado = True
+                    ticket.save()
+                
+                return JsonResponse({
+                    'success': True,
+                    'mensaje': f'Item pagado: {item.producto.nombre}',
+                    'transaction_id': resultado.transaction_id,
+                    'monto': str(monto),
+                    'ticket_completo': items_pagados >= items_solicitados.count()
+                })
+            else:
+                return JsonResponse({
+                    'success': False,
+                    'mensaje': resultado.error or 'Error al procesar el pago'
+                })
+                
+        except ItemPedido.DoesNotExist:
+            return JsonResponse({'success': False, 'mensaje': 'Item no encontrado'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'mensaje': f'Error: {str(e)}'})
+    
+    return JsonResponse({'success': False, 'mensaje': 'Método no permitido'})
 
     
 #MVC MODELO VISTA CONTROLADOR
