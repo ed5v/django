@@ -123,6 +123,65 @@
         </div>
     </div>
 
+    <!-- Tickets Pagados Recientes -->
+    <div class="section-card" style="margin-top: 30px;">
+        <h2>✅ Tickets Pagados Recientes</h2>
+        <p style="color: #666; margin-bottom: 20px;">Últimos 50 tickets con estado PAGADO</p>
+        
+        {% if tickets_pagados %}
+        <div class="tickets-pagados-grid">
+            {% for ticket in tickets_pagados %}
+            <div class="ticket-pagado-card">
+                <div class="ticket-pagado-header">
+                    <div>
+                        <h4>Ticket #{{ ticket.id }}</h4>
+                        <span class="badge badge-pagado">PAGADO</span>
+                    </div>
+                    <div class="ticket-pagado-total">
+                        ${{ ticket.total_con_descuento|floatformat:2 }}
+                    </div>
+                </div>
+                
+                <div class="ticket-pagado-info">
+                    <div class="info-item">
+                        <span class="info-label">📅 Pagado:</span>
+                        <span>{{ ticket.fecha_pago|date:"d/m/Y H:i" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">👤 Cliente:</span>
+                        <span>{{ ticket.usuario.username|default:"Sistema" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">💳 Método:</span>
+                        <span>{{ ticket.metodo_pago|default:"Efectivo"|upper }}</span>
+                    </div>
+                    {% if ticket.cupon_aplicado %}
+                    <div class="info-item cupon-info">
+                        <span class="info-label">🎟️ Cupón:</span>
+                        <span>{{ ticket.cupon_aplicado.codigo }} (-${{ ticket.descuento_aplicado|floatformat:2 }})</span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="ticket-items-mini">
+                    <strong>Items:</strong>
+                    {% for item in ticket.items.all|slice:":3" %}
+                        <span class="item-mini">{{ item.cantidad }}x {{ item.producto.nombre }}</span>
+                    {% endfor %}
+                    {% if ticket.items.count > 3 %}
+                        <span class="item-mini">+{{ ticket.items.count|add:"-3" }} más...</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align:center; padding: 40px; color:#888; background:#f9f9f9; border-radius:8px;">
+            <p>No hay tickets pagados aún</p>
+        </div>
+        {% endif %}
+    </div>
+
     <!-- Botón de Recarga -->
     <div style="text-align: center; margin-top: 30px;">
         <button onclick="location.reload()" class="btn-refresh">
@@ -286,6 +345,118 @@
 
 .btn-refresh:active {
     transform: translateY(0);
+}
+
+/* Tickets Pagados Grid */
+.tickets-pagados-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.ticket-pagado-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.ticket-pagado-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.ticket-pagado-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.ticket-pagado-header h4 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.badge-pagado {
+    background: linear-gradient(135deg, #28a745, #20863a);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    box-shadow: 0 2px 5px rgba(40, 167, 69, 0.3);
+}
+
+.ticket-pagado-total {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #28a745;
+}
+
+.ticket-pagado-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #f5f5f5;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.cupon-info {
+    background: #fff3cd;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ffc107;
+}
+
+.ticket-items-mini {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.ticket-items-mini strong {
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.item-mini {
+    display: inline-block;
+    background: white;
+    padding: 5px 10px;
+    margin: 3px;
+    border-radius: 15px;
+    border: 1px solid #e0e0e0;
+    font-size: 0.85rem;
+    color: #555;
+}
+
+@media (max-width: 768px) {
+    .tickets-pagados-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* Responsive */

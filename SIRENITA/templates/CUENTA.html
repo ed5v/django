@@ -1,9 +1,765 @@
 {% extends 'LAYOUT.html'%}
 
+{% load static %}
+
 {% block title %} CUENTA {% endblock %}
 
 {% block page_title %} CORTE DE CUENTAS {% endblock %}
 
 {% block content %}
+
+<div class="cuenta-container">
+    <div class="section-header">
+        <h2>💳 Tickets Pendientes de Pago</h2>
+        <p style="color: #666; margin-top: 5px;">Gestión de cuentas por cobrar</p>
+    </div>
+
+    {% if tickets_pendientes %}
+        <div class="tickets-grid">
+            {% for info in tickets_pendientes %}
+            <div class="ticket-card" id="ticket-card-{{ info.ticket.id }}">
+                <div class="ticket-header">
+                    <div>
+                        <h3>Ticket #{{ info.ticket.id }}</h3>
+                        <span class="badge badge-pendiente">{{ info.ticket.estado_pago }}</span>
+                    </div>
+                    <div class="ticket-total">
+                        <span class="total-label">Total:</span>
+                        <span class="total-amount" id="total-{{ info.ticket.id }}">${{ info.total_final|floatformat:2 }}</span>
+                    </div>
+                </div>
+                
+                <div class="ticket-details">
+                    <div class="detail-row">
+                        <span class="detail-label">📅 Fecha:</span>
+                        <span>{{ info.ticket.creado|date:"d/m/Y H:i" }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">👤 Cliente:</span>
+                        <span>{{ info.ticket.usuario.username|default:"Sistema" }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">📊 Estado:</span>
+                        <span class="badge-sm badge-warning">{{ info.ticket.get_estado_pago_display }}</span>
+                    </div>
+                </div>
+
+                <!-- Detalles de items -->
+                <div class="items-list">
+                    <h4>Artículos Solicitados:</h4>
+                    <ul>
+                        {% for item in info.ticket.items.all %}
+                        {% if item.solicitado %}
+                        <li class="item-con-pago" id="item-{{ item.id }}">
+                            <div class="item-info">
+                                <span class="item-nombre">{{ item.cantidad }}x {{ item.producto.nombre }}</span>
+                                <span class="item-price">${{ item.subtotal|floatformat:2 }}</span>
+                            </div>
+                            {% if item.observaciones %}
+                            <small style="display: block; color: #666; margin-top: 2px;">Obs: {{ item.observaciones }}</small>
+                            {% endif %}
+                            <button onclick="pagarItemIndividual({{ item.id }}, {{ info.ticket.id }})" 
+                                    class="btn-pagar-item" 
+                                    id="btn-pagar-item-{{ item.id }}">
+                                💳 Pagar Item Individual
+                            </button>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+                    </ul>
+                    <div class="pago-info-box">
+                        <strong>💡 Opciones de pago:</strong>
+                        <ul style="margin: 8px 0 0 0; padding-left: 20px; font-size: 0.9rem;">
+                            <li>Paga cada artículo por separado usando los botones azules</li>
+                            <li>O paga todo el ticket de una vez con el botón verde al final</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Cupón de descuento -->
+                <div class="cupon-section" id="cupon-section-{{ info.ticket.id }}">
+                    {% if info.tiene_cupon %}
+                    <div class="cupon-aplicado">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <span class="cupon-icon">🎟️</span>
+                                <strong>{{ info.cupon.codigo }}</strong>
+                                <span class="cupon-tipo">
+                                    {% if info.cupon.tipo_descuento == 'PORCENTAJE' %}
+                                        ({{ info.cupon.valor }}%)
+                                    {% else %}
+                                        (${{ info.cupon.valor }})
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <button onclick="removerCupon({{ info.ticket.id }})" class="btn-remove-cupon">✕</button>
+                        </div>
+                        <div class="descuento-info">
+                            Descuento aplicado: <strong>-${{ info.ticket.descuento_aplicado|floatformat:2 }}</strong>
+                        </div>
+                        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e0e0e0;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>Subtotal:</span>
+                                <span>${{ info.total_original|floatformat:2 }}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; color: #28a745; font-weight: bold;">
+                                <span>Total Final:</span>
+                                <span>${{ info.total_final|floatformat:2 }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="cupon-input-wrapper">
+                        <input type="text" 
+                               id="cupon-input-{{ info.ticket.id }}" 
+                               class="cupon-input" 
+                               placeholder="Código de cupón"
+                               maxlength="50">
+                        <button onclick="validarCupon({{ info.ticket.id }})" class="btn-validar-cupon">
+                            Aplicar
+                        </button>
+                    </div>
+                    <div id="cupon-message-{{ info.ticket.id }}" class="cupon-message"></div>
+                    {% endif %}
+                </div>
+
+                <!-- Botón de pago -->
+                <!-- Botones de pago -->
+                <div class="payment-actions">
+                    <button onclick="pagarTicket({{ info.ticket.id }})" class="btn-pagar-total">
+                        💰 PAGAR TICKET COMPLETO
+                    </button>
+                    <div class="total-display">
+                        Total a pagar: <strong>${{ info.total_final|floatformat:2 }}</strong>
+                    </div>
+                    <small style="color: #666; text-align: center; display: block; margin-top: 8px;">
+                        Este botón paga todos los artículos del ticket
+                    </small>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">✓</div>
+            <h3>No hay cuentas pendientes</h3>
+            <p>Todos los tickets han sido pagados</p>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+function validarCupon(ticketId) {
+    const input = document.getElementById(`cupon-input-${ticketId}`);
+    const codigo = input.value.trim().toUpperCase();
+    const messageDiv = document.getElementById(`cupon-message-${ticketId}`);
+    
+    if (!codigo) {
+        messageDiv.innerHTML = '<span class="error">Ingrese un código de cupón</span>';
+        return;
+    }
+    
+    messageDiv.innerHTML = '<span class="info">Validando...</span>';
+    
+    fetch('{% url "validar_cupon" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            codigo: codigo,
+            ticket_id: ticketId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success || data.status === 'ok') {
+            messageDiv.innerHTML = `<span class="success">${data.mensaje || data.message}</span>`;
+            
+            // Aplicar el cupón automáticamente
+            setTimeout(() => {
+                aplicarCupon(ticketId, data.cupon.id, data);
+            }, 500);
+        } else {
+            messageDiv.innerHTML = `<span class="error">${data.mensaje || data.message}</span>`;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        messageDiv.innerHTML = '<span class="error">Error de conexión</span>';
+    });
+}
+
+function aplicarCupon(ticketId, cuponId, cuponData) {
+    fetch('{% url "aplicar_cupon" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            ticket_id: ticketId,
+            cupon_id: cuponId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'ok') {
+            // Recargar la página para mostrar el cupón aplicado
+            location.reload();
+        } else {
+            alert('Error al aplicar cupón: ' + data.message);
+        }
+    });
+}
+
+function removerCupon(ticketId) {
+    if (confirm('¿Desea remover el cupón aplicado?')) {
+        fetch('{% url "remover_cupon" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                ticket_id: ticketId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success || data.status === 'ok') {
+                alert('✓ ' + (data.mensaje || data.message));
+                location.reload();
+            } else {
+                alert('Error: ' + (data.mensaje || data.message));
+            }
+        });
+    }
+}
+
+function pagarTicket(ticketId) {
+    const confirmacion = confirm(
+        '¿CONFIRMAR PAGO DEL TICKET COMPLETO?\n\n' +
+        '✓ Se pagarán TODOS los artículos del ticket\n' +
+        '✓ Se aplicará el descuento de cupón si hay uno activo\n' +
+        '✓ El ticket se marcará como PAGADO\n' +
+        '✓ Se eliminará de la sección CUENTA\n' +
+        '✓ Podrás verlo en la sección SEGUIMIENTO'
+    );
+    
+    if (confirmacion) {
+        const btn = event.target;
+        btn.disabled = true;
+        btn.textContent = '⏳ Procesando pago...';
+        
+        fetch('{% url "pagar_ticket" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                ticket_id: ticketId,
+                metodo_pago: 'EFECTIVO'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success || data.status === 'ok') {
+                alert('✓ ' + (data.mensaje || data.message));
+                // Remover el ticket de la vista
+                document.getElementById(`ticket-card-${ticketId}`).remove();
+                
+                // Si no quedan tickets, mostrar mensaje
+                const grid = document.querySelector('.tickets-grid');
+                if (grid && grid.children.length === 0) {
+                    location.reload();
+                }
+            } else {
+                alert('Error: ' + (data.mensaje || data.message));
+                btn.disabled = false;
+                btn.textContent = `💰 PAGAR TOTAL`;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error de conexión');
+            btn.disabled = false;
+            btn.textContent = `💰 PAGAR TOTAL`;
+        });
+    }
+}
+
+function pagarItemIndividual(itemId, ticketId) {
+    if (confirm('¿Confirmar el pago de este artículo?')) {
+        const btn = document.getElementById(`btn-pagar-item-${itemId}`);
+        btn.disabled = true;
+        btn.textContent = 'Procesando...';
+        
+        fetch('{% url "pagar_item_individual" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                item_id: itemId,
+                metodo_pago: 'EFECTIVO'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('✓ ' + data.mensaje);
+                
+                // Marcar el item como pagado visualmente
+                const itemElement = document.getElementById(`item-${itemId}`);
+                itemElement.style.opacity = '0.5';
+                itemElement.style.background = '#d4edda';
+                btn.textContent = '✓ PAGADO';
+                btn.style.background = '#28a745';
+                btn.disabled = true;
+                
+                // Si el ticket completo fue pagado, removerlo
+                if (data.ticket_completo) {
+                    setTimeout(() => {
+                        document.getElementById(`ticket-card-${ticketId}`).remove();
+                        
+                        // Si no quedan tickets, recargar
+                        const grid = document.querySelector('.tickets-grid');
+                        if (grid && grid.children.length === 0) {
+                            location.reload();
+                        }
+                    }, 1500);
+                }
+            } else {
+                alert('Error: ' + data.mensaje);
+                btn.disabled = false;
+                btn.textContent = '💳 Pagar Item';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error de conexión');
+            btn.disabled = false;
+            btn.textContent = '💳 Pagar Item';
+        });
+    }
+}
+</script>
+
+<style>
+.cuenta-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 3px solid #28a745;
+}
+
+.section-header h2 {
+    color: #023e8a;
+    font-size: 2rem;
+    margin-bottom: 5px;
+}
+
+.tickets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 25px;
+}
+
+.ticket-card {
+    background: white;
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border: 2px solid #e0e0e0;
+    transition: all 0.3s ease;
+}
+
+.ticket-card:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.ticket-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.ticket-header h3 {
+    margin: 0;
+    color: #023e8a;
+    font-size: 1.4rem;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-top: 5px;
+}
+
+.badge-pendiente {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.badge-sm {
+    padding: 2px 8px;
+    font-size: 0.7rem;
+}
+
+.badge-warning {
+    background: #ffc107;
+    color: #000;
+}
+
+.ticket-total {
+    text-align: right;
+}
+
+.total-label {
+    display: block;
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.total-amount {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #28a745;
+}
+
+.ticket-details {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.items-list {
+    margin: 20px 0;
+}
+
+.items-list h4 {
+    color: #0077b6;
+    margin-bottom: 10px;
+    font-size: 1rem;
+}
+
+.items-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.items-list li {
+    padding: 10px;
+    background: #f8f9fa;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    border-left: 3px solid #0077b6;
+}
+
+.item-con-pago {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px !important;
+    transition: all 0.3s ease;
+}
+
+.item-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.item-nombre {
+    font-weight: 500;
+    color: #333;
+}
+
+.item-price {
+    font-weight: bold;
+    color: #023e8a;
+}
+
+.btn-pagar-item {
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #0077b6 0%, #023e8a 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 119, 182, 0.3);
+}
+
+.btn-pagar-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 119, 182, 0.5);
+}
+
+.btn-pagar-item:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.pago-info-box {
+    margin-top: 15px;
+    padding: 12px;
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    border-radius: 8px;
+    border-left: 4px solid #0077b6;
+    color: #01497c;
+}
+
+.pago-info-box strong {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.95rem;
+}
+
+.cupon-section {
+    margin: 20px 0;
+    padding: 15px;
+    background: #e7f5ff;
+    border-radius: 8px;
+    border: 1px dashed #0077b6;
+}
+
+.cupon-input-wrapper {
+    display: flex;
+    gap: 10px;
+}
+
+.cupon-input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 2px solid #ced4da;
+    border-radius: 6px;
+    font-size: 1rem;
+    text-transform: uppercase;
+}
+
+.cupon-input:focus {
+    outline: none;
+    border-color: #0077b6;
+}
+
+.btn-validar-cupon {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #0077b6 0%, #023e8a 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-validar-cupon:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 119, 182, 0.3);
+}
+
+.cupon-message {
+    margin-top: 10px;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.cupon-message .success {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.cupon-message .error {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.cupon-message .info {
+    color: #0077b6;
+}
+
+.cupon-aplicado {
+    background: #d4edda;
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px solid #28a745;
+}
+
+.cupon-icon {
+    font-size: 1.2rem;
+    margin-right: 8px;
+}
+
+.cupon-tipo {
+    color: #666;
+    font-size: 0.85rem;
+}
+
+.btn-remove-cupon {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.btn-remove-cupon:hover {
+    background: #c82333;
+    transform: scale(1.1);
+}
+
+.descuento-info {
+    margin-top: 8px;
+    color: #155724;
+    font-size: 0.95rem;
+}
+
+.payment-actions {
+    margin-top: 25px;
+    padding: 20px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px;
+    border: 2px solid #28a745;
+}
+
+.btn-pagar-total {
+    width: 100%;
+    padding: 20px 30px;
+    background: linear-gradient(135deg, #28a745 0%, #20863a 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.3rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 15px rgba(40, 167, 69, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-pagar-total:hover {
+    background: linear-gradient(135deg, #20863a 0%, #1e7e34 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(40, 167, 69, 0.6);
+}
+
+.btn-pagar-total:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 10px rgba(40, 167, 69, 0.4);
+}
+
+.btn-pagar-total:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.total-display {
+    margin-top: 12px;
+    text-align: center;
+    font-size: 1.1rem;
+    color: #333;
+    padding: 10px;
+    background: white;
+    border-radius: 8px;
+    border: 2px dashed #28a745;
+}
+
+.total-display strong {
+    color: #28a745;
+    font-size: 1.4rem;
+}
+
+.empty-state {
+    transform: none;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.empty-icon {
+    font-size: 5rem;
+    color: #28a745;
+    margin-bottom: 20px;
+}
+
+.empty-state h3 {
+    color: #023e8a;
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+    .tickets-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .ticket-header {
+        flex-direction: column;
+    }
+    
+    .ticket-total {
+        text-align: left;
+        margin-top: 10px;
+    }
+}
+</style>
 
 {% endblock%}
