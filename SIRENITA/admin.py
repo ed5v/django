@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import (
-    Categoria, Producto, Pedido, ItemPedido,
+    Categoria, Producto, Pedido, ItemPedido, Cupon,
     Ingrediente, Receta, RecetaIngrediente,
     PasoPreparacion, Foto, Nutricional
 )
@@ -91,3 +91,10 @@ admin.site.register(RecetaIngrediente)
 admin.site.register(PasoPreparacion)
 admin.site.register(Foto)
 admin.site.register(Nutricional)
+
+# Cupones
+@admin.register(Cupon)
+class CuponAdmin(admin.ModelAdmin):
+    list_display = ('codigo', 'tipo_descuento', 'valor', 'estado', 'usos_actuales')
+    list_filter = ('tipo_descuento', 'estado')
+    search_fields = ('codigo',)

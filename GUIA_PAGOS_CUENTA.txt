@@ -1,0 +1,203 @@
+========================================================================
+     GUÍA DE PAGO DE TICKETS - SISTEMA CUENTA
+========================================================================
+
+📋 OPCIONES DE PAGO DISPONIBLES:
+
+┌────────────────────────────────────────────────────────────────────┐
+│  OPCIÓN 1: PAGAR TICKET COMPLETO (RECOMENDADO)                    │
+└────────────────────────────────────────────────────────────────────┘
+
+  ✓ Ubicación: Botón verde grande al final de cada ticket
+  ✓ Texto: "💰 PAGAR TICKET COMPLETO"
+  ✓ Función: Paga TODOS los artículos del ticket de una sola vez
+  
+  ¿Cuándo usar?
+  • Cuando el cliente paga toda la cuenta junta
+  • Es la opción más rápida y sencilla
+  • Ideal para pagos en efectivo o tarjeta por el total
+  
+  ¿Qué hace?
+  1. Paga todos los artículos solicitados automáticamente
+  2. Aplica el descuento de cupón (si hay uno activo)
+  3. Marca el ticket completo como PAGADO
+  4. Elimina el ticket de la sección CUENTA
+  5. El ticket aparece en SEGUIMIENTO con todos los detalles
+  
+  Confirmación:
+  Al hacer clic, aparece un mensaje mostrando:
+  • Se pagarán TODOS los artículos del ticket
+  • Se aplicará el descuento de cupón si hay uno activo
+  • El ticket se marcará como PAGADO
+  • Se eliminará de CUENTA
+  • Podrás verlo en SEGUIMIENTO
+
+┌────────────────────────────────────────────────────────────────────┐
+│  OPCIÓN 2: PAGAR ARTÍCULOS INDIVIDUALES                           │
+└────────────────────────────────────────────────────────────────────┘
+
+  ✓ Ubicación: Botones azules en cada artículo
+  ✓ Texto: "💳 Pagar Item Individual"
+  ✓ Función: Paga solo ese artículo específico
+  
+  ¿Cuándo usar?
+  • Cuando diferentes personas pagan sus consumos por separado
+  • División de cuenta entre comensales
+  • Pagos parciales
+  
+  ¿Qué hace?
+  1. Paga solo el artículo seleccionado
+  2. El item se marca visualmente como pagado (fondo verde)
+  3. El botón cambia a "✓ PAGADO"
+  4. Si pagas todos los items individualmente → el ticket completo
+     se marca automáticamente como PAGADO y desaparece de CUENTA
+  
+  Comportamiento inteligente:
+  • Puedes mezclar pagos: algunos items individuales + resto total
+  • El sistema lleva registro de qué items ya fueron pagados
+  • No se puede pagar un item dos veces
+
+┌────────────────────────────────────────────────────────────────────┐
+│  CUPONES DE DESCUENTO                                              │
+└────────────────────────────────────────────────────────────────────┘
+
+  📍 Ubicación: Sección amarilla entre items y botones de pago
+  
+  Cupones disponibles:
+  • DESCUENTO10 → 10% de descuento
+  • PROMO50     → $50 pesos de descuento
+  • VIP20       → 20% de descuento
+  
+  Cómo aplicar:
+  1. Escribir código del cupón en el campo de texto
+  2. Clic en "Validar Cupón"
+  3. Si es válido, clic en "Aplicar Cupón"
+  4. El descuento se calcula automáticamente
+  5. El total se actualiza
+  
+  IMPORTANTE:
+  • El cupón se aplica a TODO el ticket
+  • Si pagas items individualmente, el cupón NO se aplica
+  • Solo funciona con el botón "PAGAR TICKET COMPLETO"
+  • El uso del cupón se registra automáticamente
+
+========================================================================
+📊 EJEMPLOS PRÁCTICOS:
+========================================================================
+
+EJEMPLO 1: Mesa completa paga junta
+────────────────────────────────────
+Ticket #5: 3 artículos por $310
+1. (Opcional) Aplicar cupón DESCUENTO10 → Total: $279
+2. Clic en "💰 PAGAR TICKET COMPLETO"
+3. Confirmar
+4. ✓ Ticket pagado y eliminado de CUENTA
+
+EJEMPLO 2: División de cuenta
+────────────────────────────────────
+Ticket #5: 3 artículos
+Comensal 1: Paga su Coctel de Camarón ($120)
+  → Clic en "💳 Pagar Item Individual" del primer Coctel
+Comensal 2: Paga Tostadas ($70)
+  → Clic en "💳 Pagar Item Individual" de Tostadas
+Comensal 3: Paga el último Coctel ($120)
+  → Clic en "💳 Pagar Item Individual"
+  → Al pagar el último item, el ticket completo se marca como PAGADO
+
+EJEMPLO 3: Pago mixto
+────────────────────────────────────
+Ticket #5: 3 artículos
+1. Una persona paga 2 items individualmente
+2. Aplicas cupón VIP20 para el item restante
+3. Usas "PAGAR TICKET COMPLETO" que solo cobrará el item pendiente
+   con el descuento aplicado
+
+========================================================================
+🔍 DIFERENCIAS CLAVE:
+========================================================================
+
+┌──────────────────────┬────────────────────┬──────────────────────┐
+│                      │  TICKET COMPLETO   │  ITEMS INDIVIDUALES  │
+├──────────────────────┼────────────────────┼──────────────────────┤
+│ Botón                │ Verde grande       │ Azul pequeño         │
+│ Ubicación            │ Final del ticket   │ En cada artículo     │
+│ Aplica cupón         │ ✓ SÍ              │ ✗ NO                 │
+│ Velocidad            │ Rápido (1 clic)    │ Varios clics         │
+│ Uso típico           │ Cuenta única       │ División de cuenta   │
+│ Marcado visual       │ Ticket desaparece  │ Item fondo verde     │
+│ Registro             │ 1 transacción      │ 1 por cada item      │
+└──────────────────────┴────────────────────┴──────────────────────┘
+
+========================================================================
+💡 RECOMENDACIONES:
+========================================================================
+
+✓ USA "PAGAR TICKET COMPLETO" cuando:
+  • El cliente paga toda la cuenta
+  • Quieres aplicar un cupón de descuento
+  • Necesitas rapidez en la operación
+  • Es un solo método de pago
+
+✓ USA "PAGAR ITEM INDIVIDUAL" cuando:
+  • Diferentes personas pagan por separado
+  • División de cuenta entre comensales
+  • Pagos en diferentes métodos
+  • Pagos parciales con saldo pendiente
+
+========================================================================
+📱 FLUJO VISUAL EN LA INTERFAZ:
+========================================================================
+
+[Ticket #5 - Cliente: admin]
+┌─────────────────────────────────────────────────┐
+│ 💰 Total: $310.00                               │
+│                                                 │
+│ 📦 Artículos Solicitados:                       │
+│                                                 │
+│ ┌─────────────────────────────────────────┐     │
+│ │ 1x Coctel de Camarón        $120.00     │     │
+│ │ [💳 Pagar Item Individual]              │     │
+│ └─────────────────────────────────────────┘     │
+│                                                 │
+│ ┌─────────────────────────────────────────┐     │
+│ │ 1x Tostadas de Ceviche       $70.00     │     │
+│ │ [💳 Pagar Item Individual]              │     │
+│ └─────────────────────────────────────────┘     │
+│                                                 │
+│ ┌─────────────────────────────────────────┐     │
+│ │ 1x Coctel de Camarón        $120.00     │     │
+│ │ [💳 Pagar Item Individual]              │     │
+│ └─────────────────────────────────────────┘     │
+│                                                 │
+│ 💡 Opciones de pago:                            │
+│ • Paga cada artículo por separado (azul)       │
+│ • O paga todo el ticket de una vez (verde)     │
+│                                                 │
+│ 🎟️ [Aplicar Cupón] _____________                │
+│                                                 │
+│ ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓     │
+│ ┃  💰 PAGAR TICKET COMPLETO             ┃     │
+│ ┃  Total a pagar: $310.00               ┃     │
+│ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛     │
+│ Este botón paga todos los artículos del ticket │
+└─────────────────────────────────────────────────┘
+
+========================================================================
+✅ VERIFICACIÓN:
+========================================================================
+
+Para verificar que el sistema funciona correctamente:
+
+1. Abre: http://127.0.0.1:8000/CUENTA/
+2. Deberías ver 4 tickets pendientes
+3. Cada ticket tiene:
+   ✓ Botones azules en cada artículo (pago individual)
+   ✓ Botón verde grande al final (pago total)
+   ✓ Campo para aplicar cupón
+   ✓ Información clara de las opciones
+
+4. Prueba pagar el Ticket #5:
+   • Tiene 3 items pendientes sin pagar
+   • Puedes usar cualquiera de las dos opciones
+
+========================================================================

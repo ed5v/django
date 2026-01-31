@@ -20,6 +20,12 @@ urlpatterns = [
     path('login/', views.login_request, name="login"),        # URL explícita
     path('logout/', views.logout_request, name="logout"),     # Cerrar sesión
 
+    # --- PÁGINAS PRINCIPALES ---
+    path('INDEX/', views.INDEX, name='INDEX'),
+    path('INICIO/', views.INICIO, name='INICIO'),
+    path('CUENTA/', views.CUENTA, name='CUENTA'),
+    path('SEGUIMIENTO/', views.SEGUIMIENTO, name='SEGUIMIENTO'),
+
     # --- ORDENES ---
     path('ORDEN/', views.ORDEN, name='ORDEN'),
     path('crear_ticket/', views.crear_ticket, name='crear_ticket'),
@@ -34,4 +40,18 @@ urlpatterns = [
     path('INVENTARIO/', views.INVENTARIO, name='INVENTARIO'),
     path('CAJA/', views.CAJA, name='CAJA'),
     path('AUDITORIA/', views.AUDITORIA, name='AUDITORIA'),
+    
+    # --- RECETAS ---
+    path('recetas/', views.lista_recetas, name='lista_recetas'),
+    path('recetas/<int:pk>/', views.detalle_receta, name='detalle_receta'),
+    path('recetas/crear/', views.crear_receta, name='crear_receta'),
+    path('recetas/<int:pk>/editar/', views.editar_receta, name='editar_receta'),
+    path('recetas/<int:pk>/eliminar/', views.eliminar_receta, name='eliminar_receta'),
+    
+    # --- GESTIÓN DE PAGOS Y CUPONES ---
+    path('validar_cupon/', views.validar_cupon, name='validar_cupon'),
+    path('aplicar_cupon/', views.aplicar_cupon, name='aplicar_cupon'),
+    path('remover_cupon/', views.remover_cupon, name='remover_cupon'),
+    path('pagar_ticket/', views.pagar_ticket, name='pagar_ticket'),
+    path('pagar_item_individual/', views.pagar_item_individual, name='pagar_item_individual'),
 ]
