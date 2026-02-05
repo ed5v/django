@@ -20,21 +20,5 @@ from SIRENITA import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.INDEX, name="index"),
-    path('INICIO/', views.INDEX, name= "INICIO"),
-    path('AUDITORIA/', views.AUDITORIA, name= "AUDITORIA"),
-    path('CAJA/', views.CAJA, name= "CAJA"),
-    path('CUENTA/', views.listar_registros_pedidos, name= "CUENTA"),
-    path('INICIO/', views.INICIO, name= "INICIO"),
-    path('INVENTARIO/', views.INVENTARIO, name= "INVENTARIO"),
-    path('ORDEN/', views.ORDEN, name= "ORDEN"),    path('SEGUIMIENTO/', views.SEGUIMIENTO, name= "SEGUIMIENTO"),    
-    #path('admin/', admin.site.urls),
-    
     path('', include('SIRENITA.urls')),
-    #path('save_article/', views.save_article, name= "save"),#
-    #path('create_article/', views.create_article, name= "create")#
-    
-    #path('contacto/<str:nombre>', views.contacto, name= "contacto")#
-    #path("hello/<name>", views.hello_there, name="hello_there")
-    
 ]

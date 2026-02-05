@@ -16,7 +16,7 @@ from . import views
 
 urlpatterns = [
     # --- AUTENTICACIÓN ---
-    #path('', views.login_request, name="login"),             # Página principal → login
+    path('', views.INDEX, name='index'),                      # Página principal
     path('login/', views.login_request, name="login"),        # URL explícita
     path('logout/', views.logout_request, name="logout"),     # Cerrar sesión
 
@@ -35,6 +35,9 @@ urlpatterns = [
     path('marcar_pagado/<int:registro_id>/', views.marcar_pagado, name='marcar_pagado'),
     path('accion/<int:numero>/', views.agregar_orden, name='accion'),
     path('api/ticket/<int:numero_cliente>/', views.obtener_ticket, name='obtener_ticket'),
+
+    #path('REGISTRO/', views.listar_registros_pedidos, name='REGISTRO'),
+    #path('registro_pedidos/', views.listar_registros_pedidos, name='Registro_pedidos'),
 
     # --- MÓDULOS PROTEGIDOS ---
     path('INVENTARIO/', views.INVENTARIO, name='INVENTARIO'),

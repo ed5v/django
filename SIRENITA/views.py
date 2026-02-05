@@ -65,11 +65,67 @@ def lista_recetas(request):
     recetas = Receta.objects.all().order_by("-created_at")
     return render(request, "recetas/lista_recetas.html", {"recetas": recetas})
 
+
 @login_required
 @admin_required
 def detalle_receta(request, pk):
     receta = Receta.objects.get(pk=pk)
     return render(request, "recetas/detalle_receta.html", {"receta": receta})
+
+
+@login_required
+def CUENTA(request):
+    """Vista de cuentas pendientes - muestra los tickets pendientes de pago con items solicitados.
+    - Usuarios normales ven solo sus tickets.
+    - El usuario 'pc' ve todos los tickets.
+    """
+    # Base queryset
+    base_qs = Pedido.objects.filter(
+        estado_pago='PENDIENTE_DE_PAGO',
+        items__solicitado=True
+    )
+
+    # DEBUG: Log para verificar el usuario actual
+    print(f"[DEBUG CUENTA] Usuario logueado: {request.user.username} (id={request.user.id})")
+    
+    if request.user.username == 'pc':
+        tickets_qs = base_qs
+        print(f"[DEBUG CUENTA] Usuario 'pc' - mostrando TODOS los tickets")
+    else:
+        tickets_qs = base_qs.filter(usuario=request.user)
+        print(f"[DEBUG CUENTA] Usuario '{request.user.username}' - filtrando por usuario")
+
+    tickets_qs = tickets_qs.distinct().select_related('usuario', 'cupon_aplicado').prefetch_related('items__producto__categoria').order_by('-creado')
+    
+    # DEBUG: Log para ver qué tickets se van a mostrar
+    print(f"[DEBUG CUENTA] Total de tickets a mostrar: {tickets_qs.count()}")
+    for t in tickets_qs:
+        print(f"[DEBUG CUENTA]   - Ticket #{t.id} (usuario: {t.usuario.username})")
+
+    tickets_info = []
+    for ticket in tickets_qs:
+        total_original = ticket.total()
+        total_final = ticket.total_con_descuento()
+
+        items_solicitados = []
+        for item in ticket.items.filter(solicitado=True):
+            items_solicitados.append({
+                'item': item,
+                'pagado': hasattr(item, 'pagado_individual') and item.pagado_individual,
+            })
+
+        tickets_info.append({
+            'ticket': ticket,
+            'total_original': total_original,
+            'total_final': total_final,
+            'tiene_cupon': ticket.cupon_aplicado is not None,
+            'cupon': ticket.cupon_aplicado,
+            'items_solicitados': items_solicitados,
+        })
+
+    return render(request, 'CUENTA.html', {
+        'tickets_pendientes': tickets_info
+    })
 
 @login_required
 @admin_required
@@ -187,8 +243,8 @@ def AUDITORIA (request):
 def CAJA (request):
     return render(request,'CAJA.html')
 
-@login_required
-@admin_required
+#@login_required
+#@admin_required
 def CUENTA(request):
     """Vista de cuentas pendientes - todos los tickets pendientes de pago con items solicitados"""
     # Obtener todos los tickets que tienen items solicitados y están pendientes de pago
@@ -482,6 +538,7 @@ def solicitar_pedido(request):
     return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=400)
 
 @login_required
+@admin_required
 def listar_registros_pedidos(request):
     """Muestra todos los registros de pedidos para gestión de pagos"""
     if request.user.is_staff:
@@ -535,7 +592,10 @@ def marcar_pagado(request, registro_id):
             ).exists()
             
             if ticket_completo:
+                from django.utils import timezone
                 registro.ticket.completado = True
+                registro.ticket.estado_pago = 'PAGADO'
+                registro.ticket.fecha_pago = timezone.now()
                 registro.ticket.save()
             
             return JsonResponse({
@@ -619,15 +679,21 @@ def login_request(request):
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 login(request, user)
+                # Redirigir a la página solicitada originalmente (parámetro 'next')
+                next_url = request.GET.get('next') or request.POST.get('next')
+                if next_url:
+                    return redirect(next_url)
                 return redirect("INICIO")
 
         return render(request, "login.html", {
             "form": form,
-            "error": "Usuario o contraseña incorrectos"
+            "error": "Usuario o contraseña incorrectos",
+            "next": request.GET.get('next', '')
         })
 
     form = AuthenticationForm()
-    return render(request, "login.html", {"form": form})
+    next_url = request.GET.get('next', '')
+    return render(request, "login.html", {"form": form, "next": next_url})
 
 
 def crear_receta(request):

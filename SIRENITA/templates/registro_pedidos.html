@@ -11,7 +11,10 @@
 <div class="registros-container">
     <div class="header-section">
         <h2>📋 Registros de Pedidos Solicitados</h2>
-        <a href="{% url 'ORDEN' %}" class="btn-back">⬅ Volver a Órdenes</a>
+        <div style="display: flex; gap: 10px;">
+            <a href="{% url 'ORDEN' %}" class="btn-back">⬅ Volver a Órdenes</a>
+            <a href="{% url 'listar_registros_pedidos' %}" class="btn-back" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">💳 Ir a Cuentas Pendientes</a>
+        </div>
     </div>
 
     {% if tickets %}
@@ -69,12 +72,13 @@
                             {% if not ticket_data.pagado %}
                             <td>
                                 {% if not item.pagado %}
-                                <button onclick="marcarPagado({{ item.id }})" class="btn-pagar">
+                                <!--<button onclick="marcarPagado({{ item.id }})" class="btn-pagar">
                                     💳 Pagar
-                                </button>
+                                </button>-->
                                 {% else %}
                                 <span style="color: #28a745;">✓</span>
                                 {% endif %}
+                                <!-- /-->
                             </td>
                             {% endif %}
                         </tr>
