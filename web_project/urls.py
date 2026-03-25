@@ -24,7 +24,7 @@ urlpatterns = [
     path('INICIO/', views.INDEX, name= "INICIO"),
     path('AUDITORIA/', views.AUDITORIA, name= "AUDITORIA"),
     path('CAJA/', views.CAJA, name= "CAJA"),
-    path('CUENTA/', views.listar_registros_pedidos, name= "CUENTA"),
+    path('CUENTA/', views.CUENTA, name= "CUENTA"),
     path('INICIO/', views.INICIO, name= "INICIO"),
     path('INVENTARIO/', views.INVENTARIO, name= "INVENTARIO"),
     path('ORDEN/', views.ORDEN, name= "ORDEN"),    path('SEGUIMIENTO/', views.SEGUIMIENTO, name= "SEGUIMIENTO"),    

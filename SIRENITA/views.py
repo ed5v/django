@@ -188,7 +188,6 @@ def CAJA (request):
     return render(request,'CAJA.html')
 
 @login_required
-@admin_required
 def CUENTA(request):
     """Vista de cuentas pendientes - todos los tickets pendientes de pago con items solicitados"""
     # Obtener todos los tickets que tienen items solicitados y están pendientes de pago
@@ -729,7 +728,6 @@ def validar_cupon(request):
 
 
 @login_required
-@admin_required
 def aplicar_cupon(request):
     """Aplica un cupón a un ticket"""
     if request.method == 'POST':
@@ -783,7 +781,6 @@ def aplicar_cupon(request):
 
 
 @login_required
-@admin_required
 def remover_cupon(request):
     """Remueve un cupón aplicado a un ticket"""
     if request.method == 'POST':
@@ -820,7 +817,6 @@ def remover_cupon(request):
 
 
 @login_required
-@admin_required
 def pagar_ticket(request):
     """Procesa el pago completo de un ticket"""
     if request.method == 'POST':
@@ -890,7 +886,6 @@ def pagar_ticket(request):
 
 
 @login_required
-@admin_required
 def pagar_item_individual(request):
     """Procesa el pago de un item individual de un ticket"""
     if request.method == 'POST':
