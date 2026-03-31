@@ -8,6 +8,9 @@
 
 <form method="POST" action="{% url 'login' %}" class="max-w-md mx-auto">
     {% csrf_token %}
+    {% if next %}
+        <input type="hidden" name="next" value="{{ next }}">
+    {% endif %}
     <div class="space-y-4">
         {{ form.as_p }}
     </div>
