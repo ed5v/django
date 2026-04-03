@@ -1,6 +1,6 @@
 {% extends 'LAYOUT.html'%}
 
-{% load static %}
+{% load static number_format %}
 
 {% block title %} CUENTA {% endblock %}
 
@@ -15,6 +15,13 @@
         <div style="margin-top: 15px;">
             <a href="{% url 'listar_registros_pedidos' %}" class="btn-registro-pedidos">📋 Ver Registros de Pedidos</a>
         </div>
+        <form method="get" action="{% url 'CUENTA' %}" class="cuenta-search-form">
+            <input type="number" name="mesa" min="1" placeholder="Buscar por mesa" value="{{ mesa_busqueda }}">
+            <button type="submit">Buscar</button>
+            {% if mesa_busqueda %}
+            <a href="{% url 'CUENTA' %}" class="btn-limpiar-busqueda">Limpiar</a>
+            {% endif %}
+        </form>
     </div>
 
     {% if tickets_pendientes %}
@@ -28,7 +35,7 @@
                     </div>
                     <div class="ticket-total">
                         <span class="total-label">Total:</span>
-                        <span class="total-amount" id="total-{{ info.ticket.id }}">${{ info.total_final|floatformat:2 }}</span>
+                        <span class="total-amount" id="total-{{ info.ticket.id }}">${{ info.total_final|format_number_en }}</span>
                     </div>
                 </div>
                 
@@ -55,8 +62,8 @@
                         {% if item.solicitado %}
                         <li class="item-con-pago" id="item-{{ item.id }}">
                             <div class="item-info">
-                                <span class="item-nombre">{{ item.cantidad }}x {{ item.producto.nombre }}</span>
-                                <span class="item-price">${{ item.subtotal|floatformat:2 }}</span>
+                                <span class="item-nombre">{{ item.cantidad|format_int_en }}x {{ item.producto.nombre }}</span>
+                                <span class="item-price">${{ item.subtotal|format_number_en }}</span>
                             </div>
                             {% if item.observaciones %}
                             <small style="display: block; color: #666; margin-top: 2px;">Obs: {{ item.observaciones }}</small>
@@ -91,23 +98,23 @@
                                     {% if info.cupon.tipo_descuento == 'PORCENTAJE' %}
                                         ({{ info.cupon.valor }}%)
                                     {% else %}
-                                        (${{ info.cupon.valor }})
+                                        (${{ info.cupon.valor|format_number_en }})
                                     {% endif %}
                                 </span>
                             </div>
                             <button onclick="removerCupon({{ info.ticket.id }})" class="btn-remove-cupon">✕</button>
                         </div>
                         <div class="descuento-info">
-                            Descuento aplicado: <strong>-${{ info.ticket.descuento_aplicado|floatformat:2 }}</strong>
+                            Descuento aplicado: <strong>-${{ info.ticket.descuento_aplicado|format_number_en }}</strong>
                         </div>
                         <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e0e0e0;">
                             <div style="display: flex; justify-content: space-between;">
                                 <span>Subtotal:</span>
-                                <span>${{ info.total_original|floatformat:2 }}</span>
+                                <span>${{ info.total_original|format_number_en }}</span>
                             </div>
                             <div style="display: flex; justify-content: space-between; color: #28a745; font-weight: bold;">
                                 <span>Total Final:</span>
-                                <span>${{ info.total_final|floatformat:2 }}</span>
+                                <span>${{ info.total_final|format_number_en }}</span>
                             </div>
                         </div>
                     </div>
@@ -133,7 +140,7 @@
                         💰 PAGAR TICKET COMPLETO
                     </button>
                     <div class="total-display">
-                        Total a pagar: <strong>${{ info.total_final|floatformat:2 }}</strong>
+                        Total a pagar: <strong>${{ info.total_final|format_number_en }}</strong>
                     </div>
                     <small style="color: #666; text-align: center; display: block; margin-top: 8px;">
                         Este botón paga todos los artículos del ticket
@@ -370,6 +377,37 @@ function pagarItemIndividual(itemId, ticketId) {
     color: #023e8a;
     font-size: 2rem;
     margin-bottom: 5px;
+}
+
+.cuenta-search-form {
+    margin-top: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.cuenta-search-form input {
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    min-width: 180px;
+}
+
+.cuenta-search-form button {
+    margin: 0;
+}
+
+.btn-limpiar-busqueda {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #555;
+    background: #fff;
 }
 
 .btn-registro-pedidos {

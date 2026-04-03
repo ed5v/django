@@ -7,9 +7,10 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages  # Para usar mensajes flash
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum, Count, Q, F, DecimalField
-from django.db.models.functions import TruncDate
-from .models import Categoria, Producto, Pedido, ItemPedido, RegistroPedido, Cupon
+from django.views.decorators.cache import never_cache
+from django.db.models import Sum, Count, Q, F, DecimalField, Value
+from django.db.models.functions import TruncDate, Coalesce
+from .models import Categoria, Producto, Pedido, ItemPedido, RegistroPedido, Cupon, Mesa
 from .models import Receta, Ingrediente, PasoPreparacion, Foto, Nutricional
 from .payment_service import PaymentService
 from .forms import (
@@ -247,11 +248,21 @@ def CAJA (request):
 #@admin_required
 def CUENTA(request):
     """Vista de cuentas pendientes - todos los tickets pendientes de pago con items solicitados"""
+    mesa_busqueda = request.GET.get('mesa', '').strip()
+
     # Obtener todos los tickets que tienen items solicitados y están pendientes de pago
     tickets_pendientes = Pedido.objects.filter(
         estado_pago='PENDIENTE_DE_PAGO',
         items__solicitado=True
-    ).distinct().select_related('usuario', 'cupon_aplicado').prefetch_related('items__producto__categoria').order_by('-creado')
+    )
+
+    if mesa_busqueda:
+        try:
+            tickets_pendientes = tickets_pendientes.filter(mesa=int(mesa_busqueda))
+        except ValueError:
+            tickets_pendientes = tickets_pendientes.none()
+
+    tickets_pendientes = tickets_pendientes.distinct().select_related('usuario', 'cupon_aplicado').prefetch_related('items__producto__categoria').order_by('-creado')
     
     # Calcular información de cada ticket
     tickets_info = []
@@ -277,7 +288,8 @@ def CUENTA(request):
         })
     
     return render(request, 'CUENTA.html', {
-        'tickets_pendientes': tickets_info
+        'tickets_pendientes': tickets_info,
+        'mesa_busqueda': mesa_busqueda,
     })
 
 def INDEX (request):
@@ -353,14 +365,72 @@ def INVENTARIO (request):
 
 @login_required
 def crear_ticket(request):
-    pedido = Pedido.objects.create(usuario=request.user)
+    mesa = request.POST.get('mesa') if request.method == 'POST' else request.GET.get('mesa')
+    personas = request.POST.get('personas') if request.method == 'POST' else request.GET.get('personas')
+
+    mesa_valor = None
+    personas_valor = None
+
+    if mesa not in (None, ''):
+        try:
+            mesa_valor = int(mesa)
+        except (TypeError, ValueError):
+            mesa_valor = None
+
+    if personas not in (None, ''):
+        try:
+            personas_valor = int(personas)
+            if personas_valor <= 0:
+                personas_valor = None
+        except (TypeError, ValueError):
+            personas_valor = None
+
+    pedido = Pedido.objects.create(
+        usuario=request.user,
+        mesa=mesa_valor,
+        personas=personas_valor,
+    )
     pedido.numero_cliente = pedido.id
     pedido.save()
     return redirect(f'/ORDEN/?ticket_id={pedido.id}')
 
+
 @login_required
+def cancelar_ticket(request):
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
+
+    if not request.user.is_superuser:
+        return JsonResponse({'status': 'error', 'message': 'Solo superusuarios pueden cancelar tickets'}, status=403)
+
+    try:
+        data = json.loads(request.body)
+        ticket_id = data.get('ticket_id')
+
+        qs = Pedido.objects.filter(id=ticket_id, completado=False)
+        if not request.user.is_staff:
+            qs = qs.filter(usuario=request.user)
+
+        pedido = qs.first()
+        if not pedido:
+            return JsonResponse({'status': 'error', 'message': 'Ticket no encontrado'}, status=404)
+
+        if pedido.items.filter(solicitado=True).exists() or RegistroPedido.objects.filter(ticket=pedido).exists():
+            return JsonResponse(
+                {'status': 'error', 'message': 'No se puede cancelar: el ticket ya fue solicitado'},
+                status=400
+            )
+
+        pedido.delete()
+        return JsonResponse({'status': 'ok', 'message': 'Ticket cancelado correctamente'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+@login_required
+@never_cache
 def ORDEN(request):
     ticket_id = request.GET.get('ticket_id')
+    mesa_busqueda = request.GET.get('mesa', '').strip()
     ticket_actual = None
     
     if ticket_id:
@@ -369,17 +439,86 @@ def ORDEN(request):
             qs = qs.filter(usuario=request.user)
         ticket_actual = qs.first()
 
-    if request.user.is_staff:
-        tickets_abiertos = Pedido.objects.filter(completado=False).order_by('-creado')
-    else:
-        tickets_abiertos = Pedido.objects.filter(usuario=request.user, completado=False).order_by('-creado')
+    total_ticket_expr = Sum(
+        F('items__cantidad') * F('items__producto__precio'),
+        output_field=DecimalField(max_digits=12, decimal_places=2)
+    )
+    total_ticket_annotated = Coalesce(
+        total_ticket_expr,
+        Value(0, output_field=DecimalField(max_digits=12, decimal_places=2))
+    )
+
+    tickets_abiertos = Pedido.objects.filter(completado=False)
+    if not request.user.is_staff:
+        tickets_abiertos = tickets_abiertos.filter(usuario=request.user)
+
+    if mesa_busqueda:
+        try:
+            tickets_abiertos = tickets_abiertos.filter(mesa=int(mesa_busqueda))
+        except ValueError:
+            tickets_abiertos = tickets_abiertos.none()
+
+    tickets_abiertos = (
+        tickets_abiertos
+        .annotate(total_ticket=total_ticket_annotated)
+        .order_by('-creado', '-id')
+    )
 
     categorias = Categoria.objects.prefetch_related('productos')
+    mesas_disponibles = Mesa.objects.order_by('mesa').values_list('mesa', flat=True)
     return render(request, 'ORDEN.html', {
         'categorias': categorias,
         'ticket_actual': ticket_actual,
-        'tickets_abiertos': tickets_abiertos
+        'tickets_abiertos': tickets_abiertos,
+        'mesa_busqueda': mesa_busqueda,
+        'mesas_disponibles': mesas_disponibles,
     })
+
+
+@login_required
+def actualizar_datos_ticket(request):
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
+
+    ticket_id = request.POST.get('ticket_id')
+    mesa = request.POST.get('mesa')
+    personas = request.POST.get('personas')
+    observaciones = (request.POST.get('observaciones') or '').strip()
+
+    qs = Pedido.objects.filter(id=ticket_id, completado=False)
+    if not request.user.is_staff:
+        qs = qs.filter(usuario=request.user)
+
+    pedido = qs.first()
+    if not pedido:
+        messages.error(request, 'Ticket no encontrado o sin permisos.')
+        return redirect('ORDEN')
+
+    try:
+        mesa_valor = int(mesa)
+    except (TypeError, ValueError):
+        messages.error(request, 'La mesa debe ser un número válido.')
+        return redirect(f'/ORDEN/?ticket_id={pedido.id}')
+
+    if not Mesa.objects.filter(mesa=mesa_valor).exists():
+        messages.error(request, 'La mesa seleccionada no existe en el catálogo.')
+        return redirect(f'/ORDEN/?ticket_id={pedido.id}')
+
+    try:
+        personas_valor = int(personas)
+        if personas_valor <= 0:
+            raise ValueError()
+    except (TypeError, ValueError):
+        messages.error(request, 'El campo personas debe ser un número entero mayor a 0.')
+        return redirect(f'/ORDEN/?ticket_id={pedido.id}')
+
+    pedido.mesa = mesa_valor
+    pedido.personas = personas_valor
+    pedido.observaciones = observaciones
+    pedido.save(update_fields=['mesa', 'personas', 'observaciones'])
+
+    messages.success(request, 'Datos de la orden actualizados correctamente.')
+    return redirect(f'/ORDEN/?ticket_id={pedido.id}')
 
 def menu_view(request):
     categorias = Categoria.objects.prefetch_related('productos')
@@ -402,16 +541,87 @@ def agregar_item(request):
 
             producto = get_object_or_404(Producto, id=data['producto_id'])
             
-            ItemPedido.objects.create(
+            item = ItemPedido.objects.create(
                 pedido=pedido,
                 producto=producto,
                 observaciones=data.get('observaciones', ''),
                 cantidad=data.get('cantidad', 1)
             )
-            return JsonResponse({'status': 'ok'})
+            return JsonResponse({
+                'status': 'ok',
+                'item_id': item.id,
+                'cantidad': item.cantidad,
+                'observaciones': item.observaciones or '',
+            })
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
     return JsonResponse({'status': 'error'}, status=400)
+
+
+@login_required
+def editar_item_ticket(request):
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        item_id = data.get('item_id')
+        cantidad = data.get('cantidad')
+        observaciones = (data.get('observaciones') or '').strip()
+
+        qs = ItemPedido.objects.select_related('pedido', 'producto').filter(id=item_id, solicitado=False)
+        if not request.user.is_staff:
+            qs = qs.filter(pedido__usuario=request.user)
+
+        item = qs.first()
+        if not item:
+            return JsonResponse({'status': 'error', 'message': 'Item no encontrado o no editable'}, status=404)
+
+        if cantidad in (None, ''):
+            cantidad_valor = item.cantidad
+        else:
+            try:
+                cantidad_valor = int(cantidad)
+                if cantidad_valor <= 0:
+                    raise ValueError()
+            except (TypeError, ValueError):
+                return JsonResponse({'status': 'error', 'message': 'La cantidad debe ser un entero mayor a 0'}, status=400)
+
+        item.cantidad = cantidad_valor
+        item.observaciones = observaciones
+        item.save(update_fields=['cantidad', 'observaciones'])
+
+        return JsonResponse({
+            'status': 'ok',
+            'item_id': item.id,
+            'cantidad': item.cantidad,
+            'observaciones': item.observaciones or '',
+        })
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+
+@login_required
+def eliminar_item_ticket(request):
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        item_id = data.get('item_id')
+
+        qs = ItemPedido.objects.select_related('pedido').filter(id=item_id, solicitado=False)
+        if not request.user.is_staff:
+            qs = qs.filter(pedido__usuario=request.user)
+
+        item = qs.first()
+        if not item:
+            return JsonResponse({'status': 'error', 'message': 'Item no encontrado o no editable'}, status=404)
+
+        item.delete()
+        return JsonResponse({'status': 'ok', 'item_id': item_id})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 @login_required
 def obtener_ticket(request, numero_cliente):

@@ -1,6 +1,6 @@
 {% extends 'LAYOUT.html' %}
 
-{% load static %}
+{% load static number_format %}
 
 {% block title %} SEGUIMIENTO {% endblock %}
 
@@ -15,7 +15,7 @@
             <div class="metric-icon">💰</div>
             <div class="metric-content">
                 <h3>Total de Ventas</h3>
-                <p class="metric-value">${{ total_ventas|floatformat:2 }}</p>
+                <p class="metric-value">${{ total_ventas|format_number_en }}</p>
             </div>
         </div>
         
@@ -23,7 +23,7 @@
             <div class="metric-icon">📊</div>
             <div class="metric-content">
                 <h3>Pedidos Hoy</h3>
-                <p class="metric-value">{{ pedidos_hoy }}</p>
+                <p class="metric-value">{{ pedidos_hoy|format_int_en }}</p>
             </div>
         </div>
         
@@ -31,7 +31,7 @@
             <div class="metric-icon">⏳</div>
             <div class="metric-content">
                 <h3>Pedidos Pendientes</h3>
-                <p class="metric-value">{{ pedidos_pendientes }}</p>
+                <p class="metric-value">{{ pedidos_pendientes|format_int_en }}</p>
             </div>
         </div>
     </div>
@@ -52,8 +52,8 @@
                     {% for venta in ventas_por_usuario %}
                     <tr>
                         <td><strong>{{ venta.usuario__username|default:"Sistema" }}</strong></td>
-                        <td>{{ venta.num_pedidos }}</td>
-                        <td class="text-success">${{ venta.total|floatformat:2 }}</td>
+                        <td>{{ venta.num_pedidos|format_int_en }}</td>
+                        <td class="text-success">${{ venta.total|format_number_en }}</td>
                     </tr>
                     {% empty %}
                     <tr>
@@ -81,8 +81,8 @@
                     {% for producto in productos_mas_vendidos %}
                     <tr>
                         <td><strong>{{ producto.producto__nombre }}</strong></td>
-                        <td>{{ producto.cantidad_total }} unidades</td>
-                        <td class="text-success">${{ producto.ingresos|floatformat:2 }}</td>
+                        <td>{{ producto.cantidad_total|format_int_en }} unidades</td>
+                        <td class="text-success">${{ producto.ingresos|format_number_en }}</td>
                     </tr>
                     {% empty %}
                     <tr>
@@ -110,8 +110,8 @@
                     {% for dia in historial_ventas %}
                     <tr>
                         <td><strong>{{ dia.fecha|date:"d/m/Y" }}</strong></td>
-                        <td>{{ dia.num_pedidos }} pedidos</td>
-                        <td class="text-success">${{ dia.total_dia|floatformat:2 }}</td>
+                        <td>{{ dia.num_pedidos|format_int_en }} pedidos</td>
+                        <td class="text-success">${{ dia.total_dia|format_number_en }}</td>
                     </tr>
                     {% empty %}
                     <tr>
@@ -138,7 +138,7 @@
                         <span class="badge badge-pagado">PAGADO</span>
                     </div>
                     <div class="ticket-pagado-total">
-                        ${{ ticket.total_con_descuento|floatformat:2 }}
+                        ${{ ticket.total_con_descuento|format_number_en }}
                     </div>
                 </div>
                 
@@ -158,7 +158,7 @@
                     {% if ticket.cupon_aplicado %}
                     <div class="info-item cupon-info">
                         <span class="info-label">🎟️ Cupón:</span>
-                        <span>{{ ticket.cupon_aplicado.codigo }} (-${{ ticket.descuento_aplicado|floatformat:2 }})</span>
+                        <span>{{ ticket.cupon_aplicado.codigo }} (-${{ ticket.descuento_aplicado|format_number_en }})</span>
                     </div>
                     {% endif %}
                 </div>
@@ -166,10 +166,10 @@
                 <div class="ticket-items-mini">
                     <strong>Items:</strong>
                     {% for item in ticket.items.all|slice:":3" %}
-                        <span class="item-mini">{{ item.cantidad }}x {{ item.producto.nombre }}</span>
+                        <span class="item-mini">{{ item.cantidad|format_int_en }}x {{ item.producto.nombre }}</span>
                     {% endfor %}
                     {% if ticket.items.count > 3 %}
-                        <span class="item-mini">+{{ ticket.items.count|add:"-3" }} más...</span>
+                        <span class="item-mini">+{{ ticket.items.count|add:"-3"|format_int_en }} más...</span>
                     {% endif %}
                 </div>
             </div>

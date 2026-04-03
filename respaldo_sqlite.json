@@ -1,0 +1,1634 @@
+[
+{
+  "model": "auth.user",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$At09z2fM8KLjxSvIOdMJxZ$G5h+aTl3o0GFC/RPauJsfEBCG60vuL7Z7CCpdDpm7Eo=",
+    "last_login": "2026-02-05T03:56:01.407Z",
+    "is_superuser": true,
+    "username": "admin",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2025-11-22T01:33:14.076Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 2,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$WM8X1ljSsNjVOooghfZqVd$lYMepk/S9E+zqPNpE7cnl2zZJiaiPhAJw0qfOUvlKq8=",
+    "last_login": "2026-02-05T03:56:13.355Z",
+    "is_superuser": true,
+    "username": "pc",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2025-11-22T01:34:47.152Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 3,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$X1aKcwq2M744EkuYf2j5hh$etXuImGbqQFC7MerUsAKa9KicQvk18MNoVrygOSwoJ0=",
+    "last_login": "2026-02-05T03:20:55.880Z",
+    "is_superuser": true,
+    "username": "nuevo",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2025-11-22T02:27:58.288Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "036x46m5d8zwg1hpekzrrpiwx1sgm3wh",
+  "fields": {
+    "session_data": ".eJxVjMsOwiAQRf-FtSFAebp07zeQgRmkaiAp7cr479qkC93ec859sQjbWuM2aIkzsjOT7PS7JcgPajvAO7Rb57m3dZkT3xV-0MGvHel5Ody_gwqjfmvhNIJXpYhkCAN5kjmkXFQJVmRCU8wksytWoga01gntFSbESQUZwLD3BwrmOJ4:1vlzfn:7EEEIz4hOQCHPU94qXzpBPZwS4DSM9zwP0Ff21yJi-w",
+    "expire_date": "2026-02-14T01:21:15.545Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "dp7za18fgh8uwkql6f72470kj1d39g7o",
+  "fields": {
+    "session_data": ".eJxVjDsOwjAQBe_iGlmG9ZeSPmew1vYuDiBHipMKcXdkKQW0b2beW0Tctxr3Tmuci7iKizj9bgnzk9oA5YHtvsi8tG2dkxyKPGiX01LodTvcv4OKvY7anbUtlj1xsN6ZgJlU0t6BSioZNkV7dhoKArINGRCYMig2hIZMFp8v7tE4qA:1vnqTV:b1b_pIC43cbxvV3EXWV_Q01ln0lfWqu1GJvMtUj2mgU",
+    "expire_date": "2026-02-19T03:56:13.357Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "xr31llt06dugd1i21sf9qbttal97tpj5",
+  "fields": {
+    "session_data": ".eJxVjMsOwiAQRf-FtSGMPKQu3fcbyDAMUjWQlHZl_HfbpAvd3nPOfYuA61LC2nkOUxJXocXpd4tIT647SA-s9yap1WWeotwVedAux5b4dTvcv4OCvWw14pnAgyaV0CvHFnRmRcpQNkBOofNs0HI0wFpFuIB1me1gh-h4C8XnC-j9N7Y:1vMdUM:bx31-mWae18vJTkWYn-1q8sGNDg4zKJKcISxMcPNOIY",
+    "expire_date": "2025-12-06T02:36:38.630Z"
+  }
+},
+{
+  "model": "SIRENITA.cupon",
+  "pk": 1,
+  "fields": {
+    "codigo": "DESCUENTO10",
+    "tipo_descuento": "PORCENTAJE",
+    "valor": "10.00",
+    "fecha_inicio": "2026-01-31T00:14:40.512Z",
+    "fecha_expiracion": "2026-03-02T00:14:40.512Z",
+    "estado": "ACTIVO",
+    "usos_maximos": 100,
+    "usos_actuales": 0,
+    "creado": "2026-01-31T00:14:40.520Z"
+  }
+},
+{
+  "model": "SIRENITA.cupon",
+  "pk": 2,
+  "fields": {
+    "codigo": "PROMO50",
+    "tipo_descuento": "FIJO",
+    "valor": "50.00",
+    "fecha_inicio": "2026-01-31T00:14:40.525Z",
+    "fecha_expiracion": "2026-03-02T00:14:40.525Z",
+    "estado": "ACTIVO",
+    "usos_maximos": 50,
+    "usos_actuales": 0,
+    "creado": "2026-01-31T00:14:40.525Z"
+  }
+},
+{
+  "model": "SIRENITA.cupon",
+  "pk": 3,
+  "fields": {
+    "codigo": "VIP20",
+    "tipo_descuento": "PORCENTAJE",
+    "valor": "20.00",
+    "fecha_inicio": "2026-01-31T00:14:40.530Z",
+    "fecha_expiracion": "2026-05-01T00:14:40.530Z",
+    "estado": "ACTIVO",
+    "usos_maximos": 0,
+    "usos_actuales": 0,
+    "creado": "2026-01-31T00:14:40.530Z"
+  }
+},
+{
+  "model": "SIRENITA.categoria",
+  "pk": 1,
+  "fields": {
+    "nombre": "Entradas"
+  }
+},
+{
+  "model": "SIRENITA.categoria",
+  "pk": 2,
+  "fields": {
+    "nombre": "Bebidas"
+  }
+},
+{
+  "model": "SIRENITA.categoria",
+  "pk": 3,
+  "fields": {
+    "nombre": "Comida"
+  }
+},
+{
+  "model": "SIRENITA.producto",
+  "pk": 1,
+  "fields": {
+    "categoria": 1,
+    "nombre": "Coctel de Camar├│n",
+    "precio": "120.00",
+    "disponible": true
+  }
+},
+{
+  "model": "SIRENITA.producto",
+  "pk": 2,
+  "fields": {
+    "categoria": 1,
+    "nombre": "Empanadas de Camar├│n",
+    "precio": "85.00",
+    "disponible": true
+  }
+},
+{
+  "model": "SIRENITA.producto",
+  "pk": 3,
+  "fields": {
+    "categoria": 1,
+    "nombre": "Tostadas de Ceviche",
+    "precio": "70.00",
+    "disponible": true
+  }
+},
+{
+  "model": "SIRENITA.producto",
+  "pk": 4,
+  "fields": {
+    "categoria": 2,
+    "nombre": "Michelada",
+    "precio": "50.00",
+    "disponible": true
+  }
+},
+{
+  "model": "SIRENITA.pedido",
+  "pk": 1,
+  "fields": {
+    "usuario": 1,
+    "numero_cliente": 1,
+    "creado": "2026-01-30T01:22:57.183Z",
+    "completado": true,
+    "estado_pago": "PENDIENTE_DE_PAGO",
+    "cupon_aplicado": null,
+    "descuento_aplicado": "0.00",
+    "fecha_pago": null,
+    "metodo_pago": null
+  }
+},
+{
+  "model": "SIRENITA.pedido",
+  "pk": 2,
+  "fields": {
+    "usuario": 1,
+    "numero_cliente": 2,
+    "creado": "2026-01-30T01:38:40.844Z",
+    "completado": true,
+    "estado_pago": "PAGADO",
+    "cupon_aplicado": null,
+    "descuento_aplicado": "0.00",
+    "fecha_pago": "2026-02-05T04:02:17.714Z",
+    "metodo_pago": "EFECTIVO"
+  }
+},
+{
+  "model": "SIRENITA.pedido",
+  "pk": 3,
+  "fields": {
+    "usuario": 3,
+    "numero_cliente": 3,
+    "creado": "2026-01-30T01:45:47.167Z",
+    "completado": true,
+    "estado_pago": "PENDIENTE_DE_PAGO",
+    "cupon_aplicado": null,
+    "descuento_aplicado": "0.00",
+    "fecha_pago": null,
+    "metodo_pago": null
+  }
+},
+{
+  "model": "SIRENITA.pedido",
+  "pk": 4,
+  "fields": {
+    "usuario": 1,
+    "numero_cliente": 4,
+    "creado": "2026-01-30T23:59:55.169Z",
+    "completado": true,
+    "estado_pago": "PENDIENTE_DE_PAGO",
+    "cupon_aplicado": null,
+    "descuento_aplicado": "0.00",
+    "fecha_pago": null,
+    "metodo_pago": null
+  }
+},
+{
+  "model": "SIRENITA.pedido",
+  "pk": 5,
+  "fields": {
+    "usuario": 1,
+    "numero_cliente": 5,
+    "creado": "2026-01-31T00:15:52.018Z",
+    "completado": true,
+    "estado_pago": "PENDIENTE_DE_PAGO",
+    "cupon_aplicado": null,
+    "descuento_aplicado": "0.00",
+    "fecha_pago": null,
+    "metodo_pago": null
+  }
+},
+{
+  "model": "SIRENITA.pedido",
+  "pk": 6,
+  "fields": {
+    "usuario": 1,
+    "numero_cliente": 6,
+    "creado": "2026-01-31T00:28:07.476Z",
+    "completado": true,
+    "estado_pago": "PAGADO",
+    "cupon_aplicado": null,
+    "descuento_aplicado": "0.00",
+    "fecha_pago": "2026-02-05T02:42:43.053Z",
+    "metodo_pago": "EFECTIVO"
+  }
+},
+{
+  "model": "SIRENITA.pedido",
+  "pk": 7,
+  "fields": {
+    "usuario": 1,
+    "numero_cliente": 7,
+    "creado": "2026-01-31T03:12:38.111Z",
+    "completado": false,
+    "estado_pago": "PENDIENTE_DE_PAGO",
+    "cupon_aplicado": null,
+    "descuento_aplicado": "0.00",
+    "fecha_pago": null,
+    "metodo_pago": null
+  }
+},
+{
+  "model": "SIRENITA.pedido",
+  "pk": 8,
+  "fields": {
+    "usuario": 1,
+    "numero_cliente": 8,
+    "creado": "2026-01-31T04:14:29.196Z",
+    "completado": false,
+    "estado_pago": "PENDIENTE_DE_PAGO",
+    "cupon_aplicado": null,
+    "descuento_aplicado": "0.00",
+    "fecha_pago": null,
+    "metodo_pago": null
+  }
+},
+{
+  "model": "SIRENITA.pedido",
+  "pk": 9,
+  "fields": {
+    "usuario": 1,
+    "numero_cliente": 9,
+    "creado": "2026-01-31T04:14:49.573Z",
+    "completado": false,
+    "estado_pago": "PENDIENTE_DE_PAGO",
+    "cupon_aplicado": null,
+    "descuento_aplicado": "0.00",
+    "fecha_pago": null,
+    "metodo_pago": null
+  }
+},
+{
+  "model": "SIRENITA.pedido",
+  "pk": 10,
+  "fields": {
+    "usuario": 1,
+    "numero_cliente": 10,
+    "creado": "2026-01-31T04:20:55.856Z",
+    "completado": true,
+    "estado_pago": "PAGADO",
+    "cupon_aplicado": null,
+    "descuento_aplicado": "0.00",
+    "fecha_pago": "2026-02-05T04:03:08.204Z",
+    "metodo_pago": "EFECTIVO"
+  }
+},
+{
+  "model": "SIRENITA.pedido",
+  "pk": 11,
+  "fields": {
+    "usuario": 3,
+    "numero_cliente": 11,
+    "creado": "2026-02-05T03:51:01.777Z",
+    "completado": false,
+    "estado_pago": "PENDIENTE_DE_PAGO",
+    "cupon_aplicado": null,
+    "descuento_aplicado": "0.00",
+    "fecha_pago": null,
+    "metodo_pago": null
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 1,
+  "fields": {
+    "pedido": 1,
+    "producto": 3,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": false
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 2,
+  "fields": {
+    "pedido": 1,
+    "producto": 1,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": false
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 3,
+  "fields": {
+    "pedido": 1,
+    "producto": 1,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": false
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 4,
+  "fields": {
+    "pedido": 2,
+    "producto": 1,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 5,
+  "fields": {
+    "pedido": 2,
+    "producto": 2,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 6,
+  "fields": {
+    "pedido": 2,
+    "producto": 3,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 7,
+  "fields": {
+    "pedido": 1,
+    "producto": 3,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": false
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 8,
+  "fields": {
+    "pedido": 1,
+    "producto": 1,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": false
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 9,
+  "fields": {
+    "pedido": 1,
+    "producto": 2,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": false
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 10,
+  "fields": {
+    "pedido": 3,
+    "producto": 1,
+    "cantidad": 1,
+    "observaciones": "Bien cocido\n",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 11,
+  "fields": {
+    "pedido": 3,
+    "producto": 2,
+    "cantidad": 1,
+    "observaciones": "Sin cebolla",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 12,
+  "fields": {
+    "pedido": 3,
+    "producto": 2,
+    "cantidad": 1,
+    "observaciones": "Con todo",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 13,
+  "fields": {
+    "pedido": 3,
+    "producto": 3,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": false
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 14,
+  "fields": {
+    "pedido": 3,
+    "producto": 3,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": false
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 15,
+  "fields": {
+    "pedido": 4,
+    "producto": 1,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 16,
+  "fields": {
+    "pedido": 4,
+    "producto": 2,
+    "cantidad": 1,
+    "observaciones": "otro",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 17,
+  "fields": {
+    "pedido": 4,
+    "producto": 3,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 18,
+  "fields": {
+    "pedido": 5,
+    "producto": 1,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 19,
+  "fields": {
+    "pedido": 5,
+    "producto": 3,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 20,
+  "fields": {
+    "pedido": 5,
+    "producto": 1,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 21,
+  "fields": {
+    "pedido": 5,
+    "producto": 1,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": false
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 22,
+  "fields": {
+    "pedido": 5,
+    "producto": 3,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": false
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 23,
+  "fields": {
+    "pedido": 6,
+    "producto": 1,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 24,
+  "fields": {
+    "pedido": 6,
+    "producto": 1,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 25,
+  "fields": {
+    "pedido": 6,
+    "producto": 1,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 26,
+  "fields": {
+    "pedido": 6,
+    "producto": 3,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 27,
+  "fields": {
+    "pedido": 6,
+    "producto": 1,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 28,
+  "fields": {
+    "pedido": 6,
+    "producto": 3,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 29,
+  "fields": {
+    "pedido": 7,
+    "producto": 1,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 30,
+  "fields": {
+    "pedido": 7,
+    "producto": 2,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 31,
+  "fields": {
+    "pedido": 7,
+    "producto": 3,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 32,
+  "fields": {
+    "pedido": 8,
+    "producto": 1,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 33,
+  "fields": {
+    "pedido": 8,
+    "producto": 3,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 34,
+  "fields": {
+    "pedido": 8,
+    "producto": 2,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 35,
+  "fields": {
+    "pedido": 9,
+    "producto": 3,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 36,
+  "fields": {
+    "pedido": 10,
+    "producto": 1,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 37,
+  "fields": {
+    "pedido": 10,
+    "producto": 2,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 38,
+  "fields": {
+    "pedido": 10,
+    "producto": 3,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 39,
+  "fields": {
+    "pedido": 9,
+    "producto": 3,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 40,
+  "fields": {
+    "pedido": 11,
+    "producto": 1,
+    "cantidad": 1,
+    "observaciones": "",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.itempedido",
+  "pk": 41,
+  "fields": {
+    "pedido": 11,
+    "producto": 4,
+    "cantidad": 1,
+    "observaciones": "doble",
+    "solicitado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 1,
+  "fields": {
+    "usuario": 1,
+    "ticket": 1,
+    "producto": 3,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "70.00",
+    "subtotal": "70.00",
+    "fecha": "2026-01-30T02:02:04.781Z",
+    "observaciones": "",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 2,
+  "fields": {
+    "usuario": 1,
+    "ticket": 1,
+    "producto": 1,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "120.00",
+    "subtotal": "120.00",
+    "fecha": "2026-01-30T02:02:04.793Z",
+    "observaciones": "",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 3,
+  "fields": {
+    "usuario": 1,
+    "ticket": 1,
+    "producto": 1,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "120.00",
+    "subtotal": "120.00",
+    "fecha": "2026-01-30T02:02:04.799Z",
+    "observaciones": "",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 4,
+  "fields": {
+    "usuario": 1,
+    "ticket": 2,
+    "producto": 1,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "120.00",
+    "subtotal": "120.00",
+    "fecha": "2026-01-30T02:07:39.180Z",
+    "observaciones": "",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 5,
+  "fields": {
+    "usuario": 1,
+    "ticket": 2,
+    "producto": 2,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "85.00",
+    "subtotal": "85.00",
+    "fecha": "2026-01-30T02:07:39.188Z",
+    "observaciones": "",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 6,
+  "fields": {
+    "usuario": 1,
+    "ticket": 2,
+    "producto": 3,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "70.00",
+    "subtotal": "70.00",
+    "fecha": "2026-01-30T02:07:39.191Z",
+    "observaciones": "",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 7,
+  "fields": {
+    "usuario": 1,
+    "ticket": 1,
+    "producto": 3,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "70.00",
+    "subtotal": "70.00",
+    "fecha": "2026-01-30T02:07:53.741Z",
+    "observaciones": "",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 8,
+  "fields": {
+    "usuario": 1,
+    "ticket": 1,
+    "producto": 1,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "120.00",
+    "subtotal": "120.00",
+    "fecha": "2026-01-30T02:07:53.750Z",
+    "observaciones": "",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 9,
+  "fields": {
+    "usuario": 1,
+    "ticket": 1,
+    "producto": 1,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "120.00",
+    "subtotal": "120.00",
+    "fecha": "2026-01-30T02:07:53.752Z",
+    "observaciones": "",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 10,
+  "fields": {
+    "usuario": 1,
+    "ticket": 2,
+    "producto": 1,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "120.00",
+    "subtotal": "120.00",
+    "fecha": "2026-01-30T22:25:17.345Z",
+    "observaciones": "",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 11,
+  "fields": {
+    "usuario": 1,
+    "ticket": 2,
+    "producto": 2,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "85.00",
+    "subtotal": "85.00",
+    "fecha": "2026-01-30T22:25:17.351Z",
+    "observaciones": "",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 12,
+  "fields": {
+    "usuario": 1,
+    "ticket": 2,
+    "producto": 3,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "70.00",
+    "subtotal": "70.00",
+    "fecha": "2026-01-30T22:25:17.351Z",
+    "observaciones": "",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 13,
+  "fields": {
+    "usuario": 1,
+    "ticket": 3,
+    "producto": 1,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "120.00",
+    "subtotal": "120.00",
+    "fecha": "2026-01-30T22:26:31.846Z",
+    "observaciones": "Bien cocido\n",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 14,
+  "fields": {
+    "usuario": 1,
+    "ticket": 3,
+    "producto": 2,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "85.00",
+    "subtotal": "85.00",
+    "fecha": "2026-01-30T22:26:31.846Z",
+    "observaciones": "Sin cebolla",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 15,
+  "fields": {
+    "usuario": 1,
+    "ticket": 3,
+    "producto": 2,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "85.00",
+    "subtotal": "85.00",
+    "fecha": "2026-01-30T22:26:31.860Z",
+    "observaciones": "Con todo",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 16,
+  "fields": {
+    "usuario": 1,
+    "ticket": 4,
+    "producto": 1,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "120.00",
+    "subtotal": "120.00",
+    "fecha": "2026-01-31T00:15:46.204Z",
+    "observaciones": "",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 17,
+  "fields": {
+    "usuario": 1,
+    "ticket": 4,
+    "producto": 2,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "85.00",
+    "subtotal": "85.00",
+    "fecha": "2026-01-31T00:15:46.210Z",
+    "observaciones": "otro",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 18,
+  "fields": {
+    "usuario": 1,
+    "ticket": 4,
+    "producto": 3,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "70.00",
+    "subtotal": "70.00",
+    "fecha": "2026-01-31T00:15:46.216Z",
+    "observaciones": "",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 19,
+  "fields": {
+    "usuario": 1,
+    "ticket": 5,
+    "producto": 1,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "120.00",
+    "subtotal": "120.00",
+    "fecha": "2026-01-31T00:17:55.642Z",
+    "observaciones": "",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 20,
+  "fields": {
+    "usuario": 1,
+    "ticket": 5,
+    "producto": 3,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "70.00",
+    "subtotal": "70.00",
+    "fecha": "2026-01-31T00:17:55.656Z",
+    "observaciones": "",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 21,
+  "fields": {
+    "usuario": 1,
+    "ticket": 5,
+    "producto": 1,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "120.00",
+    "subtotal": "120.00",
+    "fecha": "2026-01-31T00:17:55.667Z",
+    "observaciones": "",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 22,
+  "fields": {
+    "usuario": 1,
+    "ticket": 6,
+    "producto": 1,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "120.00",
+    "subtotal": "120.00",
+    "fecha": "2026-01-31T00:28:15.441Z",
+    "observaciones": "",
+    "pagado": false
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 23,
+  "fields": {
+    "usuario": 1,
+    "ticket": 6,
+    "producto": 1,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "120.00",
+    "subtotal": "120.00",
+    "fecha": "2026-01-31T00:28:15.450Z",
+    "observaciones": "",
+    "pagado": false
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 24,
+  "fields": {
+    "usuario": 1,
+    "ticket": 6,
+    "producto": 1,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "120.00",
+    "subtotal": "120.00",
+    "fecha": "2026-01-31T00:28:15.459Z",
+    "observaciones": "",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 25,
+  "fields": {
+    "usuario": 1,
+    "ticket": 6,
+    "producto": 3,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "70.00",
+    "subtotal": "70.00",
+    "fecha": "2026-01-31T01:22:07.620Z",
+    "observaciones": "",
+    "pagado": false
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 26,
+  "fields": {
+    "usuario": 1,
+    "ticket": 6,
+    "producto": 1,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "120.00",
+    "subtotal": "120.00",
+    "fecha": "2026-01-31T01:22:07.629Z",
+    "observaciones": "",
+    "pagado": false
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 27,
+  "fields": {
+    "usuario": 1,
+    "ticket": 6,
+    "producto": 3,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "70.00",
+    "subtotal": "70.00",
+    "fecha": "2026-01-31T01:22:07.634Z",
+    "observaciones": "",
+    "pagado": false
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 28,
+  "fields": {
+    "usuario": 1,
+    "ticket": 7,
+    "producto": 1,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "120.00",
+    "subtotal": "120.00",
+    "fecha": "2026-01-31T03:13:00.924Z",
+    "observaciones": "",
+    "pagado": false
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 29,
+  "fields": {
+    "usuario": 1,
+    "ticket": 7,
+    "producto": 2,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "85.00",
+    "subtotal": "85.00",
+    "fecha": "2026-01-31T03:13:00.924Z",
+    "observaciones": "",
+    "pagado": false
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 30,
+  "fields": {
+    "usuario": 1,
+    "ticket": 7,
+    "producto": 3,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "70.00",
+    "subtotal": "70.00",
+    "fecha": "2026-01-31T03:13:00.924Z",
+    "observaciones": "",
+    "pagado": false
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 31,
+  "fields": {
+    "usuario": 1,
+    "ticket": 8,
+    "producto": 1,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "120.00",
+    "subtotal": "120.00",
+    "fecha": "2026-01-31T04:14:37.477Z",
+    "observaciones": "",
+    "pagado": false
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 32,
+  "fields": {
+    "usuario": 1,
+    "ticket": 8,
+    "producto": 3,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "70.00",
+    "subtotal": "70.00",
+    "fecha": "2026-01-31T04:14:37.483Z",
+    "observaciones": "",
+    "pagado": false
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 33,
+  "fields": {
+    "usuario": 1,
+    "ticket": 8,
+    "producto": 2,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "85.00",
+    "subtotal": "85.00",
+    "fecha": "2026-01-31T04:14:37.487Z",
+    "observaciones": "",
+    "pagado": false
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 34,
+  "fields": {
+    "usuario": 1,
+    "ticket": 9,
+    "producto": 3,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "70.00",
+    "subtotal": "70.00",
+    "fecha": "2026-01-31T04:14:54.988Z",
+    "observaciones": "",
+    "pagado": false
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 35,
+  "fields": {
+    "usuario": 1,
+    "ticket": 10,
+    "producto": 1,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "120.00",
+    "subtotal": "120.00",
+    "fecha": "2026-01-31T04:21:03.644Z",
+    "observaciones": "",
+    "pagado": false
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 36,
+  "fields": {
+    "usuario": 1,
+    "ticket": 10,
+    "producto": 2,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "85.00",
+    "subtotal": "85.00",
+    "fecha": "2026-01-31T04:21:03.649Z",
+    "observaciones": "",
+    "pagado": false
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 37,
+  "fields": {
+    "usuario": 1,
+    "ticket": 10,
+    "producto": 3,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "70.00",
+    "subtotal": "70.00",
+    "fecha": "2026-01-31T04:21:03.654Z",
+    "observaciones": "",
+    "pagado": false
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 38,
+  "fields": {
+    "usuario": 1,
+    "ticket": 9,
+    "producto": 3,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "70.00",
+    "subtotal": "70.00",
+    "fecha": "2026-01-31T04:32:02.553Z",
+    "observaciones": "",
+    "pagado": false
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 39,
+  "fields": {
+    "usuario": 1,
+    "ticket": 6,
+    "producto": 1,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "120.00",
+    "subtotal": "120.00",
+    "fecha": "2026-02-05T02:42:43.060Z",
+    "observaciones": "",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 40,
+  "fields": {
+    "usuario": 1,
+    "ticket": 6,
+    "producto": 1,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "120.00",
+    "subtotal": "120.00",
+    "fecha": "2026-02-05T02:42:43.060Z",
+    "observaciones": "",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 41,
+  "fields": {
+    "usuario": 1,
+    "ticket": 6,
+    "producto": 1,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "120.00",
+    "subtotal": "120.00",
+    "fecha": "2026-02-05T02:42:43.060Z",
+    "observaciones": "",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 42,
+  "fields": {
+    "usuario": 1,
+    "ticket": 6,
+    "producto": 3,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "70.00",
+    "subtotal": "70.00",
+    "fecha": "2026-02-05T02:42:43.060Z",
+    "observaciones": "",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 43,
+  "fields": {
+    "usuario": 1,
+    "ticket": 6,
+    "producto": 1,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "120.00",
+    "subtotal": "120.00",
+    "fecha": "2026-02-05T02:42:43.076Z",
+    "observaciones": "",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 44,
+  "fields": {
+    "usuario": 1,
+    "ticket": 6,
+    "producto": 3,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "70.00",
+    "subtotal": "70.00",
+    "fecha": "2026-02-05T02:42:43.076Z",
+    "observaciones": "",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 45,
+  "fields": {
+    "usuario": 3,
+    "ticket": 11,
+    "producto": 1,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "120.00",
+    "subtotal": "120.00",
+    "fecha": "2026-02-05T03:54:10.116Z",
+    "observaciones": "",
+    "pagado": false
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 46,
+  "fields": {
+    "usuario": 3,
+    "ticket": 11,
+    "producto": 4,
+    "categoria": 2,
+    "cantidad": 1,
+    "precio_unitario": "50.00",
+    "subtotal": "50.00",
+    "fecha": "2026-02-05T03:54:10.128Z",
+    "observaciones": "doble",
+    "pagado": false
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 47,
+  "fields": {
+    "usuario": 1,
+    "ticket": 2,
+    "producto": 1,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "120.00",
+    "subtotal": "120.00",
+    "fecha": "2026-02-05T04:02:17.723Z",
+    "observaciones": "",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 48,
+  "fields": {
+    "usuario": 1,
+    "ticket": 2,
+    "producto": 2,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "85.00",
+    "subtotal": "85.00",
+    "fecha": "2026-02-05T04:02:17.726Z",
+    "observaciones": "",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 49,
+  "fields": {
+    "usuario": 1,
+    "ticket": 2,
+    "producto": 3,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "70.00",
+    "subtotal": "70.00",
+    "fecha": "2026-02-05T04:02:17.729Z",
+    "observaciones": "",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 50,
+  "fields": {
+    "usuario": 1,
+    "ticket": 10,
+    "producto": 1,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "120.00",
+    "subtotal": "120.00",
+    "fecha": "2026-02-05T04:03:08.213Z",
+    "observaciones": "",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 51,
+  "fields": {
+    "usuario": 1,
+    "ticket": 10,
+    "producto": 2,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "85.00",
+    "subtotal": "85.00",
+    "fecha": "2026-02-05T04:03:08.216Z",
+    "observaciones": "",
+    "pagado": true
+  }
+},
+{
+  "model": "SIRENITA.registropedido",
+  "pk": 52,
+  "fields": {
+    "usuario": 1,
+    "ticket": 10,
+    "producto": 3,
+    "categoria": 1,
+    "cantidad": 1,
+    "precio_unitario": "70.00",
+    "subtotal": "70.00",
+    "fecha": "2026-02-05T04:03:08.219Z",
+    "observaciones": "",
+    "pagado": true
+  }
+}
+]

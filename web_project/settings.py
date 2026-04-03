@@ -11,7 +11,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from importlib.util import find_spec
 import os
+from dotenv import load_dotenv
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'INICIO'
@@ -19,6 +21,9 @@ LOGOUT_REDIRECT_URL = 'login'
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Carga variables desde .env en desarrollo local
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -54,6 +59,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'SIRENITA.middleware.RegistroAccesoMiddleware',
 ]
 
 ROOT_URLCONF = 'web_project.urls'
@@ -64,6 +70,9 @@ TEMPLATES = [
         'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
+            'libraries': {
+                'number_format': 'SIRENITA.templatetags.number_format',
+            },
             'context_processors': [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
@@ -79,16 +88,41 @@ WSGI_APPLICATION = 'web_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME', 'marisqueria_db'),
-        'USER': os.environ.get('DB_USER', 'postgres'),
-        'PASSWORD': os.environ.get('DB_PASSWORD'),
-        'HOST': os.environ.get('DB_HOST', 'localhost'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
-    }
+DB_ENGINE = os.environ.get('DB_ENGINE', 'postgresql').strip().lower()
+
+
+def _postgres_driver_available():
+    return find_spec('psycopg') is not None or find_spec('psycopg2') is not None
+
+
+sqlite_database = {
+    'ENGINE': 'django.db.backends.sqlite3',
+    'NAME': BASE_DIR / 'db.sqlite3',
 }
+
+postgres_database = {
+    'ENGINE': 'django.db.backends.postgresql',
+    'NAME': os.environ.get('DB_NAME', 'marisqueria_db'),
+    'USER': os.environ.get('DB_USER', 'postgres'),
+    'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+    'HOST': os.environ.get('DB_HOST', 'localhost'),
+    'PORT': os.environ.get('DB_PORT', '5432'),
+}
+
+use_sqlite_fallback = (
+    DB_ENGINE in {'postgres', 'postgresql'}
+    and not _postgres_driver_available()
+    and sqlite_database['NAME'].exists()
+)
+
+if DB_ENGINE in {'sqlite', 'sqlite3'} or use_sqlite_fallback:
+    DATABASES = {
+        'default': sqlite_database,
+    }
+else:
+    DATABASES = {
+        'default': postgres_database,
+    }
 
 
 # Password validation
@@ -113,7 +147,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es'
 
 TIME_ZONE = 'UTC'
 

@@ -11,13 +11,36 @@
     {% if next %}
         <input type="hidden" name="next" value="{{ next }}">
     {% endif %}
-    <div class="space-y-4">
-        {{ form.as_p }}
+    {% if form.errors %}
+    <div class="error-alert">
+        ⚠️ {% for error in form.non_field_errors %}{{ error }}{% endfor %}
     </div>
+    {% endif %}
+<div class="space-y-4">
+    <p>
+        {{ form.username.label_tag }}
+        {{ form.username }}
+    </p>
+    <p>
+        {{ form.password.label_tag }}
+        {{ form.password }}
+    </p>
+</div>
     <button type="submit" class="w-full mt-6 py-3 px-4 bg-gradient-to-r from-blue-600 to-blue-800 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:transform hover:scale-105">Iniciar sesión</button>
 </form>
 
 <style>
+    .error-alert {
+        background-color: #fff3cd;
+        border: 2px solid #ffc107;
+        border-left: 6px solid #ff9800;
+        color: #7d4e00;
+        border-radius: 6px;
+        padding: 12px 16px;
+        margin-bottom: 16px;
+        font-weight: 600;
+        font-size: 15px;
+    }
     form input {
         width: 100%;
         padding: 12px;

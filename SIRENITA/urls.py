@@ -29,7 +29,11 @@ urlpatterns = [
     # --- ORDENES ---
     path('ORDEN/', views.ORDEN, name='ORDEN'),
     path('crear_ticket/', views.crear_ticket, name='crear_ticket'),
+    path('actualizar_datos_ticket/', views.actualizar_datos_ticket, name='actualizar_datos_ticket'),
+    path('cancelar_ticket/', views.cancelar_ticket, name='cancelar_ticket'),
     path('agregar_item/', views.agregar_item, name='agregar_item'),
+    path('editar_item_ticket/', views.editar_item_ticket, name='editar_item_ticket'),
+    path('eliminar_item_ticket/', views.eliminar_item_ticket, name='eliminar_item_ticket'),
     path('solicitar_pedido/', views.solicitar_pedido, name='solicitar_pedido'),
     path('registros_pedidos/', views.listar_registros_pedidos, name='listar_registros_pedidos'),
     path('marcar_pagado/<int:registro_id>/', views.marcar_pagado, name='marcar_pagado'),

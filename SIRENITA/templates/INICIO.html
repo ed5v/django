@@ -1,9 +1,12 @@
 {% extends 'LAYOUT.html'%}
+{% load static %}
 
 {% block title %} NUEVA SESION {% endblock %}
 
-{% block page_title %} INICIO DE SESIÓN {% endblock %}
+{% block page_title %}{% endblock %}
 
 {% block content %}
-
+<div class="w-full flex justify-center py-4">
+	<img src="{% static 'css/logo.png' %}" alt="Logo La Sirenita" class="w-40 sm:w-48 md:w-56 h-auto">
+</div>
 {%endblock%}

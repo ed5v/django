@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (
     Categoria, Producto, Pedido, ItemPedido, Cupon,
     Ingrediente, Receta, RecetaIngrediente,
-    PasoPreparacion, Foto, Nutricional
+    PasoPreparacion, Foto, Nutricional, RegistroAcceso
 )
 
 # =====================================================
@@ -98,3 +98,21 @@ class CuponAdmin(admin.ModelAdmin):
     list_display = ('codigo', 'tipo_descuento', 'valor', 'estado', 'usos_actuales')
     list_filter = ('tipo_descuento', 'estado')
     search_fields = ('codigo',)
+
+
+# =====================================================
+#            AUDITORÍA DE ACCESOS - ADMIN
+# =====================================================
+@admin.register(RegistroAcceso)
+class RegistroAccesoAdmin(admin.ModelAdmin):
+    list_display = ('usuario', 'tipo_acceso', 'estado', 'fecha_hora', 'ip_address')
+    list_filter = ('tipo_acceso', 'estado', 'fecha_hora', 'usuario')
+    search_fields = ('usuario__username', 'ip_address')
+    readonly_fields = ('usuario', 'fecha_hora', 'tipo_acceso', 'ip_address', 'navegador', 'estado')
+    date_hierarchy = 'fecha_hora'
+    
+    def has_add_permission(self, request):
+        return False
+    
+    def has_delete_permission(self, request, obj=None):
+        return False

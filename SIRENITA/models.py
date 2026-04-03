@@ -68,6 +68,21 @@ class Categoria(models.Model):
 
 
 # ===========================================
+#                   MESAS
+# ===========================================
+class Mesa(models.Model):
+    mesa = models.IntegerField(unique=True)
+    observaciones = models.TextField(blank=True, null=True)
+
+    class Meta:
+        db_table = 'SIRENITA_mesas'
+        ordering = ['mesa']
+
+    def __str__(self):
+        return f"Mesa {self.mesa}"
+
+
+# ===========================================
 #                 PRODUCTOS
 # ===========================================
 class Producto(models.Model):
@@ -100,6 +115,9 @@ class Pedido(models.Model):
     
     usuario = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     numero_cliente = models.IntegerField(null=True, blank=True)
+    mesa = models.IntegerField(null=True, blank=True)
+    personas = models.IntegerField(null=True, blank=True)
+    observaciones = models.TextField(null=True, blank=True)
     creado = models.DateTimeField(auto_now_add=True)
     completado = models.BooleanField(default=False)
     
@@ -243,3 +261,36 @@ class Nutricional(models.Model):
 
     def __str__(self):
         return f"Información nutricional de {self.receta.titulo}"
+
+
+# ===========================================
+#            AUDITORÍA DE ACCESOS
+# ===========================================
+class RegistroAcceso(models.Model):
+    TIPO_ACCESO_CHOICES = [
+        ('LOGIN', 'Login'),
+        ('LOGOUT', 'Logout'),
+        ('INTENTO_FALLIDO', 'Intento Fallido'),
+    ]
+    
+    ESTADO_CHOICES = [
+        ('EXITOSO', 'Exitoso'),
+        ('FALLIDO', 'Fallido'),
+    ]
+    
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='accesos')
+    fecha_hora = models.DateTimeField(auto_now_add=True)
+    tipo_acceso = models.CharField(max_length=20, choices=TIPO_ACCESO_CHOICES)
+    ip_address = models.GenericIPAddressField()
+    navegador = models.CharField(max_length=255, blank=True, null=True)
+    estado = models.CharField(max_length=15, choices=ESTADO_CHOICES)
+    observaciones = models.TextField(blank=True, null=True)
+    
+    class Meta:
+        db_table = 'tbl_registro_accesos'
+        ordering = ['-fecha_hora']
+        verbose_name = 'Registro de Acceso'
+        verbose_name_plural = 'Registros de Acceso'
+    
+    def __str__(self):
+        return f"{self.usuario.username} - {self.tipo_acceso} - {self.fecha_hora}"

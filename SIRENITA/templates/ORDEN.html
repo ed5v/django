@@ -1,7 +1,7 @@
 
 {% extends 'LAYOUT.html'%}
 
-{% load static %}
+{% load static number_format l10n %}
 
 {% block title %} ORDEN {% endblock %}
 
@@ -20,9 +20,22 @@
 <div class="container" style="display:block;">
     <div style="text-align:center; margin: 40px 0;">
         <h2 style="font-size: 2rem; color: #023e8a; margin-bottom: 30px;">Gestión de Tickets</h2>
-        <a href="{% url 'crear_ticket' %}" class="btn-new-ticket">
-            <span style="font-size: 1.5rem; margin-right: 10px;">+</span> ABRIR NUEVO TICKET
-        </a>
+    <form method="get" action="{% url 'ORDEN' %}" style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-bottom:18px;">
+      <input type="number" name="mesa" min="1" placeholder="Buscar por mesa" value="{{ mesa_busqueda }}" style="padding:10px 12px; border:1px solid #ccc; border-radius:8px; min-width:180px;">
+      <button type="submit" style="margin-left:0; margin-top:0;">Buscar</button>
+      {% if mesa_busqueda %}
+      <a href="{% url 'ORDEN' %}" style="display:inline-flex; align-items:center; padding:10px 14px; border:1px solid #ccc; border-radius:8px; text-decoration:none; color:#555; background:#fff;">Limpiar</a>
+      {% endif %}
+    </form>
+
+    <form method="post" action="{% url 'crear_ticket' %}" style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap; align-items:center;">
+      {% csrf_token %}
+      <!-- <input type="number" name="mesa" min="1" required placeholder="Mesa" style="padding:10px 12px; border:1px solid #ccc; border-radius:8px; width:110px;">-->
+      <!-- <input type="number" name="personas" min="1" placeholder="Personas" style="padding:10px 12px; border:1px solid #ccc; border-radius:8px; width:110px;">-->
+      <button type="submit" class="btn-new-ticket" style="border:none;">
+        <span style="font-size: 1.5rem; margin-right: 10px;">+</span> ABRIR NUEVO TICKET
+      </button>
+    </form>
     </div>
 
     <div class="tickets-list-section">
@@ -34,11 +47,13 @@
                     <a href="{% url 'ORDEN' %}?ticket_id={{ t.id }}" class="ticket-link">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <span style="font-weight:bold; font-size:1.1rem; color:#023e8a;">Ticket #{{ t.id }}</span>
-                            <span style="font-weight:bold; color:#28a745;">${{ t.total }}</span>
+                      <span style="font-weight:bold; color:#28a745;">${{ t.total_ticket|format_number_en }}</span>
                         </div>
                         <div class="ticket-info">
                             <span style="margin-right:15px;">📅 {{ t.creado|date:"d/m/Y H:i" }}</span>
                             <span>👤 {{ t.usuario.username|default:"Sistema" }}</span>
+                          <span style="margin-left:15px;">🪑 Mesa {{ t.mesa|default:"-" }}</span>
+                          <span style="margin-left:15px;">👥 {% if t.personas %}{{ t.personas|format_int_en }}{% else %}-{% endif %}</span>
                         </div>
                     </a>
                 </li>
@@ -113,6 +128,51 @@
 
 {% else %}
 
+<div style="max-width: 980px; margin: 0 auto 16px auto; background:#f8fbff; border:1px solid #d9e8f7; border-radius:10px; padding:12px;">
+  <form method="post" action="{% url 'actualizar_datos_ticket' %}" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+    {% csrf_token %}
+    <input type="hidden" name="ticket_id" value="{{ ticket_actual.id }}">
+
+    <div>
+      <label for="mesa" style="font-size:0.85rem; color:#555; font-weight:600; display:block; margin-bottom:4px;">Mesa</label>
+      <select id="mesa" name="mesa" required style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px;">
+        <option value="">Selecciona mesa</option>
+        {% for mesa in mesas_disponibles %}
+        <option value="{{ mesa }}" {% if ticket_actual.mesa == mesa %}selected{% endif %}>Mesa {{ mesa }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div>
+      <label for="personas" style="font-size:0.85rem; color:#555; font-weight:600; display:block; margin-bottom:4px;">Personas</label>
+      <input id="personas" type="number" name="personas" min="1" step="1" inputmode="numeric" required value="{{ ticket_actual.personas|default:'' }}" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px;">
+    </div>
+
+    <div style="grid-column:1 / -1;">
+      <label for="observaciones_ticket" style="font-size:0.85rem; color:#555; font-weight:600; display:block; margin-bottom:4px;">Observaciones</label>
+      <textarea id="observaciones_ticket" name="observaciones" rows="2" placeholder="Observaciones de la orden" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px; resize:vertical;">{{ ticket_actual.observaciones|default:'' }}</textarea>
+    </div>
+
+    <div style="grid-column:1 / -1; text-align:right;">
+      <button type="submit" style="margin:0;">Guardar datos de orden</button>
+    </div>
+  </form>
+
+  {% if messages %}
+    {% for message in messages %}
+    {% if message.tags == 'success' %}
+    <div style="padding:8px 10px; border-radius:6px; margin-top:10px; font-size:0.9rem; background:#eaf7ec; color:#1f6d2f; border:1px solid #b7e0bf;">
+      {{ message }}
+    </div>
+    {% else %}
+    <div style="padding:8px 10px; border-radius:6px; margin-top:10px; font-size:0.9rem; background:#fff3f3; color:#8b1f1f; border:1px solid #efb6b6;">
+      {{ message }}
+    </div>
+    {% endif %}
+    {% endfor %}
+  {% endif %}
+</div>
+
 <div class="container">
   <!-- Sección izquierda: Menú -->
   <div class="menu-section">
@@ -143,9 +203,9 @@
       <h3>{{ categoria.nombre }}</h3>
       <ul>
         {% for producto in categoria.productos.all %}
-          <li>
-            {{ producto.nombre }} - ${{ producto.precio }}
-            <button onclick="agregarProducto({{ producto.id }}, '{{ producto.nombre }}', {{ producto.precio }})">Agregar</button>
+          <li class="menu-item-row">
+            <span class="menu-item-label">{{ producto.nombre }} - ${{ producto.precio|format_number_en }}</span>
+            <button class="menu-item-btn" onclick="agregarProducto({{ producto.id }}, '{{ producto.nombre }}', {{ producto.precio|unlocalize }})">Agregar</button>
           </li>
         {% endfor %}
       </ul>
@@ -158,7 +218,7 @@
   <div class="ticket-section">
     <h2>Ticket #<span id="cliente-id">{{ ticket_actual.id }}</span></h2>
     <div id="ticket-info-extra" style="font-size:0.85rem; color:#666; margin-bottom:10px;">
-        Usuario: {{ ticket_actual.usuario.username|default:"Sistema" }} | {{ ticket_actual.creado|date:"d/m H:i" }}
+      Usuario: {{ ticket_actual.usuario.username|default:"Sistema" }} | Mesa: {{ ticket_actual.mesa|default:"-" }} | Personas: {{ ticket_actual.personas|default:"-" }} | {{ ticket_actual.creado|date:"d/m H:i" }}
     </div>
     
     <!-- Sección de artículos solicitados -->
@@ -178,11 +238,16 @@
     </div>
     
     <hr>
-    <h3>Total: $<span id="ticket-total">0</span></h3>
+    <h3>Total: $<span id="ticket-total">0.00</span></h3>
     <div style="margin-top: 20px; text-align: center;">
         <button onclick="solicitarPedido()" class="btn-solicitar" id="btn-solicitar">
             📋 SOLICITAR PEDIDO
         </button>
+      {% if user.is_superuser %}
+      <button onclick="cancelarTicket()" class="btn-cancelar-ticket" id="btn-cancelar-ticket">
+        🗑 CANCELAR TICKET
+      </button>
+      {% endif %}
     </div>
   </div>
 </div>
@@ -203,13 +268,29 @@ const TICKET_ID = {{ ticket_actual.id }};
 let productoSeleccionado = null;
 let productoNombre = '';
 let productoPrecio = 0;
+const moneyFormatter = new Intl.NumberFormat('en-US', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+const intFormatter = new Intl.NumberFormat('en-US', {
+  maximumFractionDigits: 0,
+});
+
+function formatMoney(value) {
+  return moneyFormatter.format(Number(value) || 0);
+}
+
+function formatQty(value) {
+  return intFormatter.format(Number(value) || 0);
+}
+
 let ticketSolicitados = [
     {% for item in ticket_actual.items.all %}
     {% if item.solicitado %}
     {
         id: {{ item.id }},
         producto: "{{ item.producto.nombre }}",
-        precio: {{ item.producto.precio }},
+        precio: {{ item.producto.precio|unlocalize }},
         cantidad: {{ item.cantidad }},
         observaciones: "{{ item.observaciones|escapejs }}",
         solicitado: true
@@ -223,7 +304,7 @@ let ticketNuevos = [
     {
         id: {{ item.id }},
         producto: "{{ item.producto.nombre }}",
-        precio: {{ item.producto.precio }},
+        precio: {{ item.producto.precio|unlocalize }},
         cantidad: {{ item.cantidad }},
         observaciones: "{{ item.observaciones|escapejs }}",
         solicitado: false
@@ -283,10 +364,11 @@ function enviarProducto() {
   .then(data => {
       if(data.status === 'ok') {
           ticketNuevos.push({
+            id: data.item_id,
             producto: productoNombre,
             precio: productoPrecio,
-            observaciones: observaciones || null,
-            cantidad: 1,
+            observaciones: data.observaciones || null,
+            cantidad: data.cantidad || 1,
             solicitado: false
           });
           actualizarTicket();
@@ -306,15 +388,35 @@ function actualizarTicket() {
   const ticketNuevosDiv = document.getElementById('ticket-nuevos');
   const totalSpan = document.getElementById('ticket-total');
 
+  const solicitadosOrdenados = [...ticketSolicitados].sort((a, b) => {
+    const nombreA = (a.producto || '').toString();
+    const nombreB = (b.producto || '').toString();
+    const comparacion = nombreA.localeCompare(nombreB, 'es', { sensitivity: 'base' });
+    if (comparacion !== 0) {
+      return comparacion;
+    }
+    return (a.id || 0) - (b.id || 0);
+  });
+
+  const nuevosOrdenados = [...ticketNuevos].sort((a, b) => {
+    const nombreA = (a.producto || '').toString();
+    const nombreB = (b.producto || '').toString();
+    const comparacion = nombreA.localeCompare(nombreB, 'es', { sensitivity: 'base' });
+    if (comparacion !== 0) {
+      return comparacion;
+    }
+    return (a.id || 0) - (b.id || 0);
+  });
+
   let total = 0;
   
   // Renderizar items solicitados
   let htmlSolicitados = '<ul style="list-style: none; padding: 0; margin: 0;">';
-  if (ticketSolicitados.length > 0) {
-    ticketSolicitados.forEach(item => {
+  if (solicitadosOrdenados.length > 0) {
+    solicitadosOrdenados.forEach(item => {
       total += item.precio * item.cantidad;
       htmlSolicitados += `<li style="padding: 8px 0; border-bottom: 1px solid #d4edda; color: #155724;">
-        <strong>${item.cantidad}x ${item.producto}</strong> - $${item.precio}`;
+        <strong>${formatQty(item.cantidad)}x ${item.producto}</strong> - $${formatMoney(item.precio)}`;
       if (item.observaciones) {
         htmlSolicitados += `<br><small style="color: #666;">Obs: ${item.observaciones}</small>`;
       }
@@ -328,13 +430,21 @@ function actualizarTicket() {
   
   // Renderizar items nuevos
   let htmlNuevos = '<ul style="list-style: none; padding: 0; margin: 0;">';
-  if (ticketNuevos.length > 0) {
-    ticketNuevos.forEach(item => {
+  if (nuevosOrdenados.length > 0) {
+    nuevosOrdenados.forEach(item => {
       total += item.precio * item.cantidad;
-      htmlNuevos += `<li style="padding: 8px 0; border-bottom: 1px solid #ffe0b2; color: #e65100;">
-        <strong>${item.cantidad}x ${item.producto}</strong> - $${item.precio}`;
+      htmlNuevos += `<li class="ticket-new-item" style="padding: 8px 0; border-bottom: 1px solid #ffe0b2; color: #e65100;">
+        <div class="ticket-new-content">
+          <strong>${formatQty(item.cantidad)}x ${item.producto}</strong> - $${formatMoney(item.precio)}`;
       if (item.observaciones) {
         htmlNuevos += `<br><small style="color: #666;">Obs: ${item.observaciones}</small>`;
+      }
+      htmlNuevos += `</div>`;
+      if (item.id) {
+        htmlNuevos += `<div class="ticket-new-actions">
+          <button type="button" onclick="editarItemTicket(${item.id})" style="margin:0; padding:6px 10px; font-size:12px; min-height:36px;">✏️ Editar</button>
+          <button type="button" onclick="eliminarItemTicket(${item.id})" style="margin:0; padding:6px 10px; font-size:12px; min-height:36px; background:linear-gradient(135deg, #dc3545 0%, #b02a37 100%);">🗑 Eliminar</button>
+        </div>`;
       }
       htmlNuevos += '</li>';
     });
@@ -344,7 +454,74 @@ function actualizarTicket() {
   htmlNuevos += '</ul>';
   ticketNuevosDiv.innerHTML = htmlNuevos;
 
-  totalSpan.innerText = total.toFixed(2);
+  totalSpan.innerText = formatMoney(total);
+}
+
+function editarItemTicket(itemId) {
+  const item = ticketNuevos.find(i => i.id === itemId);
+  if (!item) {
+    alert('Item no encontrado');
+    return;
+  }
+
+  const nuevasObservaciones = prompt('Observaciones:', item.observaciones || '');
+  if (nuevasObservaciones === null) {
+    return;
+  }
+
+  fetch('{% url "editar_item_ticket" %}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': '{{ csrf_token }}'
+    },
+    body: JSON.stringify({
+      item_id: itemId,
+      observaciones: nuevasObservaciones
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.status === 'ok') {
+      item.cantidad = data.cantidad;
+      item.observaciones = data.observaciones || null;
+      actualizarTicket();
+    } else {
+      alert('No se pudo editar: ' + (data.message || 'Error desconocido'));
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('Error de conexión al editar el item.');
+  });
+}
+
+function eliminarItemTicket(itemId) {
+  if (!confirm('¿Eliminar este elemento del ticket?')) {
+    return;
+  }
+
+  fetch('{% url "eliminar_item_ticket" %}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': '{{ csrf_token }}'
+    },
+    body: JSON.stringify({ item_id: itemId })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.status === 'ok') {
+      ticketNuevos = ticketNuevos.filter(i => i.id !== itemId);
+      actualizarTicket();
+    } else {
+      alert('No se pudo eliminar: ' + (data.message || 'Error desconocido'));
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('Error de conexión al eliminar el item.');
+  });
 }
 
 function solicitarPedido() {
@@ -396,6 +573,43 @@ function solicitarPedido() {
           btnSolicitar.textContent = '📋 SOLICITAR PEDIDO';
       });
   }
+}
+
+function cancelarTicket() {
+  const btnCancelar = document.getElementById('btn-cancelar-ticket');
+
+  if (!confirm('¿Desea cancelar este ticket? Esta acción eliminará los productos no solicitados.')) {
+  return;
+  }
+
+  btnCancelar.disabled = true;
+  btnCancelar.textContent = 'Cancelando...';
+
+  fetch('{% url "cancelar_ticket" %}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': '{{ csrf_token }}'
+    },
+    body: JSON.stringify({ ticket_id: TICKET_ID })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.status === 'ok') {
+      alert(data.message || 'Ticket cancelado correctamente');
+      window.location.href = '{% url "ORDEN" %}';
+    } else {
+      alert('No se pudo cancelar: ' + (data.message || 'Error desconocido'));
+      btnCancelar.disabled = false;
+      btnCancelar.textContent = '🗑 CANCELAR TICKET';
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('Error de conexión al cancelar el ticket.');
+    btnCancelar.disabled = false;
+    btnCancelar.textContent = '🗑 CANCELAR TICKET';
+  });
 }
 
 document.addEventListener('keydown', function(event) {
@@ -506,6 +720,33 @@ button:active {
   transform: none;
 }
 
+.btn-cancelar-ticket {
+  width: 100%;
+  margin-top: 10px;
+  margin-left: 0;
+  padding: 13px 30px;
+  background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
+}
+
+.btn-cancelar-ticket:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(220, 53, 69, 0.45);
+}
+
+.btn-cancelar-ticket:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
 h2 {
   color: #023e8a;
   margin-bottom: 15px;
@@ -527,6 +768,48 @@ ul li {
   font-size: 15px;
 }
 
+.menu-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu-section .menu-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.menu-section .menu-item-label {
+  flex: 1;
+  min-width: 0;
+}
+
+.menu-section .menu-item-btn {
+  margin: 0;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.ticket-new-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.ticket-new-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.ticket-new-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 /* Mobile optimizations */
 @media (max-width: 768px) {
   .ticket-section {
@@ -534,12 +817,13 @@ ul li {
     top: 0;
     max-height: none;
   }
-  
-  button {
-    display: block;
-    width: 100%;
-    margin-left: 0;
-    margin-top: 8px;
+
+  .menu-section .menu-item-row {
+    gap: 10px;
+  }
+
+  .ticket-new-actions {
+    gap: 6px;
   }
   
   h2 {
