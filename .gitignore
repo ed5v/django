@@ -24,3 +24,6 @@ ENV/
 # OS
 .DS_Store
 Thumbs.db
+
+# Permisos personales de Claude Code (no compartir)
+.claude/settings.local.json
