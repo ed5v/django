@@ -33,3 +33,45 @@ se habilitará el menú de corte de caja en el cual se encontrará la informaci�
 
 Funciones especiales: Adicionalmente considerar tener la posibilidad de mostrar notificaciones enviadas desde dispositivos conectados al mismo sistema.
 
+## Despliegue local
+
+Requisitos: Python 3.11+ instalado.
+
+### Primera vez (configuración inicial)
+
+```powershell
+cd ruta\al\repo\django
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+pip install Django Pillow python-dotenv
+python manage.py migrate
+```
+
+> Nota: `psycopg2-binary`/`psycopg` (listados en `requirements.txt`) son solo necesarios si vas a conectarte a PostgreSQL. Si no se instalan, `web_project/settings.py` cae automáticamente a SQLite (`db.sqlite3`) siempre que ese archivo exista en el repo.
+
+Si necesitas un usuario administrador para entrar a `/admin`:
+
+```powershell
+python manage.py createsuperuser
+```
+
+### Cada vez que quieras trabajar en el proyecto
+
+```powershell
+cd ruta\al\repo\django
+.\venv\Scripts\Activate.ps1
+python manage.py migrate    # solo si hay migraciones nuevas
+python manage.py runserver
+```
+
+Abre `http://127.0.0.1:8000` en el navegador. Para detener el servidor: `Ctrl+C`.
+
+### Usar PostgreSQL en vez de SQLite
+
+1. Instala los drivers: `pip install psycopg2-binary psycopg`
+2. Copia `.env.example` a `.env` y completa las credenciales de tu base de datos.
+3. Corre `python manage.py migrate` para crear el esquema en PostgreSQL.
+
+### VS Code
+
+Selecciona `venv\Scripts\python.exe` como intérprete del workspace (`Ctrl+Shift+P` → "Python: Select Interpreter") para que la terminal integrada abra el entorno virtual automáticamente.
